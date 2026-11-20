@@ -39,49 +39,20 @@
   @media (hover: hover) { .button:hover { transform: translateY(-2px); filter: brightness(1.08) } }
   .button:active { transform: translateY(4px); box-shadow: inset 0 1px 0 #fff5, 0 1px 0 var(--base) }
   .button:focus-visible { outline: 3px solid #fff4dc; outline-offset: 5px }
-  .scene {
-    position: relative; min-height: 24rem; isolation: isolate; overflow: hidden;
-    border-radius: 49% 49% 1.75rem 1.75rem; border: 1px solid var(--line);
-    background: radial-gradient(ellipse at 56% 38%, #486e5a, #25473c 66%, #17342c);
-    box-shadow: inset 0 1px 0 #fff2, 0 20px 42px #071b174d;
+  .ramadan-art {
+    display: block;
+    width: 100%;
+    height: auto;
+    border: 1px solid #f6cb8359;
+    border-radius: clamp(1.15rem, 3vw, 2rem);
+    background: #143529;
+    box-shadow: 0 18px 44px #071b1780, 0 0 38px #f6cb8314;
+    animation: reveal-ramadan-art .65s ease-out both;
   }
-  .moon {
-    position: absolute; top: 13%; left: 29%; width: 42%; aspect-ratio: 1; border-radius: 50%;
-    box-shadow: inset 1.25rem -.8rem 0 .15rem #ffd48b, inset 1.65rem -1.02rem 0 .12rem #c68b52;
-    filter: drop-shadow(-.45rem .65rem .35rem #172b2385);
-    transform: rotate(-22deg); animation: float 6s ease-in-out infinite;
+  @keyframes reveal-ramadan-art {
+    from { opacity: 0; transform: translateY(.45rem) }
+    to { opacity: 1; transform: translateY(0) }
   }
-  .star { position: absolute; color: #f6dc9d; text-shadow: 0 0 .8rem #f7cf8e; font-size: 1.6rem }
-  .star.one { top: 19%; left: 67% }
-  .star.two { top: 37%; left: 19%; font-size: 1rem }
-  .star.three { top: 43%; left: 78%; font-size: 1.15rem }
-  .plinth {
-    position: absolute; bottom: 10%; left: 16%; width: 68%; height: 14%; border-radius: 50%;
-    background: linear-gradient(150deg, #9ab79c, #577960 68%);
-    box-shadow: 0 .85rem 0 #365745, 0 1.35rem 1.2rem #122b23;
-  }
-  .lantern {
-    position: absolute; bottom: 19%; left: 55%; width: 17%; height: 29%;
-    border: .48rem solid #d69854; border-radius: 40% 40% 21% 21%;
-    background: radial-gradient(ellipse, #fff5bd, #edaa59 70%); 
-    box-shadow: inset 0 0 .8rem #b86a39, .35rem .45rem .8rem #263b2f;
-  }
-  .lantern::before {
-    content: ''; position: absolute; width: 27%; aspect-ratio: 1; border: .2rem solid #f3c886;
-    border-radius: 50%; left: 34%; bottom: 100%; margin-bottom: .45rem;
-  }
-  .book {
-    position: absolute; bottom: 22%; left: 29%; width: 27%; height: 12%;
-    perspective: 12rem; transform: rotate(-9deg);
-  }
-  .book::before, .book::after {
-    content: ''; position: absolute; width: 51%; height: 100%; border-radius: .35rem;
-    background: repeating-linear-gradient(#f7e6c4 0 5px, #ebd2a7 5px 6px);
-    border-bottom: .3rem solid #ad774c; box-shadow: 0 .3rem .45rem #253c32;
-  }
-  .book::before { left: 0; transform: skewY(14deg) }
-  .book::after { right: 0; transform: skewY(-14deg) }
-  @keyframes float { 50% { transform: translateY(-.55rem) rotate(-19deg) } }
   .cards { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem }
   .card, dialog {
     border: 1px solid var(--line); border-radius: 1.35rem; padding: clamp(1.2rem, 4vw, 2rem);
@@ -94,8 +65,6 @@
   footer { color: var(--muted); padding-block: 2rem; font-size: .95rem }
   @media (max-width: 46rem) {
     .hero, .cards { grid-template-columns: 1fr }
-    .scene { min-height: clamp(15rem, 65vw, 23rem) }
-    .moon { width: min(42%, 10rem) }
   }
   @media (max-width: 26rem) { .actions .button { width: 100% } }
   @media (prefers-reduced-motion: reduce) {
