@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="ms">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#122e29">
+<meta name="description" content="Portal Tahlil dan Khatam Al-Quran Ramadan anjuran Syafie Legacy.">
+<title>Tahlil &amp; Khatam Al-Quran Ramadan | Syafie Legacy</title>
+<style>
+  :root {
+    color-scheme: dark;
+    --ink: #122e29;
+    --cream: #fff4dc;
+    --muted: #c7d7ca;
+    --gold: #f6cb83;
+    --line: #ffffff29;
+  }
+  * { box-sizing: border-box }
+  body {
+    margin: 0;
+    font: 1.0625rem/1.55 system-ui, sans-serif;
+    color: var(--cream);
+    background: radial-gradient(ellipse at 72% 15%, #315c4d, transparent 55%), var(--ink);
+    min-height: 100vh;
+  }
+  .wrap { width: min(100% - 2.5rem, 70rem); margin-inline: auto }
+  header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; padding-block: 1.5rem }
+  .brand { display: inline-flex; align-items: center; gap: .7rem; font-weight: 700 }
+  .mark {
+    display: grid; place-items: center; width: 2.7rem; aspect-ratio: 1; border-radius: .85rem;
+    background: linear-gradient(145deg, #ffe3a5, #d19b55); color: var(--ink);
+    box-shadow: inset 0 2px 1px #fff8, 0 3px 0 #865d32;
+  }
+  .hero { display: grid; grid-template-columns: 1.15fr 1fr; align-items: center; gap: 2rem; padding-block: clamp(2rem, 7vw, 5rem) }
+  h1, h2 { font-family: Georgia, serif; font-weight: 500; line-height: 1.08; margin: 0 }
+  h1 { font-size: clamp(2.65rem, 7vw, 5.25rem); letter-spacing: -.04em }
+  h1 span { display: block; color: var(--gold) }
+  h2 { font-size: clamp(1.65rem, 4vw, 2.35rem) }
+  p { color: var(--muted); margin: .8rem 0 0 }
+  .actions { display: flex; flex-wrap: wrap; gap: 1rem; margin-top: 1.6rem }
+  .button {
+    display: inline-flex; align-items: center; justify-content: center; min-height: 3rem;
+    padding: .65rem 1.12rem; border: 1px solid #fff3; border-radius: .85rem; cursor: pointer;
+    font: inherit; font-weight: 750; text-decoration: none; color: var(--ink);
+    background: linear-gradient(160deg, #ffe5a6, #edb86d);
+    --base: #9c6634;
+    box-shadow: inset 0 2px 0 #fff7, 0 5px 0 var(--base), 0 9px 15px #0004;
+    transition: transform .18s ease, box-shadow .18s ease, filter .18s ease;
+  }
+  .button.secondary { color: var(--cream); background: linear-gradient(160deg, #467566, #285347); --base: #102b25 }
+  @media (hover: hover) { .button:hover { transform: translateY(-2px); filter: brightness(1.08) } }
+  .button:active { transform: translateY(4px); box-shadow: inset 0 1px 0 #fff5, 0 1px 0 var(--base) }
+  .button:focus-visible { outline: 3px solid #fff4dc; outline-offset: 5px }
+  .scene {
+    position: relative; min-height: 24rem; isolation: isolate; overflow: hidden;
+    border-radius: 49% 49% 1.75rem 1.75rem; border: 1px solid var(--line);
+    background: radial-gradient(ellipse at 56% 38%, #486e5a, #25473c 66%, #17342c);
+    box-shadow: inset 0 1px 0 #fff2, 0 20px 42px #071b174d;
+  }
+  .moon {
+    position: absolute; top: 13%; left: 29%; width: 42%; aspect-ratio: 1; border-radius: 50%;
+    box-shadow: inset 1.25rem -.8rem 0 .15rem #ffd48b, inset 1.65rem -1.02rem 0 .12rem #c68b52;
+    filter: drop-shadow(-.45rem .65rem .35rem #172b2385);
+    transform: rotate(-22deg); animation: float 6s ease-in-out infinite;
+  }
+  .star { position: absolute; color: #f6dc9d; text-shadow: 0 0 .8rem #f7cf8e; font-size: 1.6rem }
+  .star.one { top: 19%; left: 67% }
+  .star.two { top: 37%; left: 19%; font-size: 1rem }
+  .star.three { top: 43%; left: 78%; font-size: 1.15rem }
+  .plinth {
+    position: absolute; bottom: 10%; left: 16%; width: 68%; height: 14%; border-radius: 50%;
+    background: linear-gradient(150deg, #9ab79c, #577960 68%);
+    box-shadow: 0 .85rem 0 #365745, 0 1.35rem 1.2rem #122b23;
+  }
+  .lantern {
+    position: absolute; bottom: 19%; left: 55%; width: 17%; height: 29%;
+    border: .48rem solid #d69854; border-radius: 40% 40% 21% 21%;
+    background: radial-gradient(ellipse, #fff5bd, #edaa59 70%); 
+    box-shadow: inset 0 0 .8rem #b86a39, .35rem .45rem .8rem #263b2f;
+  }
+  .lantern::before {
+    content: ''; position: absolute; width: 27%; aspect-ratio: 1; border: .2rem solid #f3c886;
+    border-radius: 50%; left: 34%; bottom: 100%; margin-bottom: .45rem;
+  }
+  .book {
+    position: absolute; bottom: 22%; left: 29%; width: 27%; height: 12%;
+    perspective: 12rem; transform: rotate(-9deg);
+  }
+  .book::before, .book::after {
+    content: ''; position: absolute; width: 51%; height: 100%; border-radius: .35rem;
+    background: repeating-linear-gradient(#f7e6c4 0 5px, #ebd2a7 5px 6px);
+    border-bottom: .3rem solid #ad774c; box-shadow: 0 .3rem .45rem #253c32;
+  }
+  .book::before { left: 0; transform: skewY(14deg) }
+  .book::after { right: 0; transform: skewY(-14deg) }
+  @keyframes float { 50% { transform: translateY(-.55rem) rotate(-19deg) } }
+  .cards { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem }
+  .card, dialog {
+    border: 1px solid var(--line); border-radius: 1.35rem; padding: clamp(1.2rem, 4vw, 2rem);
+    background: linear-gradient(135deg, #ffffff14, #ffffff08);
+    box-shadow: inset 0 1px 0 #fff1, 0 10px 25px #0a241c38;
+  }
+  dialog { width: min(100% - 2rem, 30rem); color: var(--cream); background: #24483d }
+  dialog::backdrop { background: #081915da }
+  dialog form { margin-top: 1.25rem; padding-bottom: .35rem }
+  footer { color: var(--muted); padding-block: 2rem; font-size: .95rem }
+  @media (max-width: 46rem) {
+    .hero, .cards { grid-template-columns: 1fr }
+    .scene { min-height: clamp(15rem, 65vw, 23rem) }
+    .moon { width: min(42%, 10rem) }
+  }
+  @media (max-width: 26rem) { .actions .button { width: 100% } }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation: none !important; transition: none !important }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="brand"><span class="mark" aria-hidden="true">SL</span> Syafie Legacy</div>
+    <button class="button secondary" type="button" data-open="urusetia">Akses Urusetia</button>
+  </header>
+  <main>
+    <section class="hero" aria-labelledby="tajuk">
+      <div>
+        <h1 id="tajuk">Tahlil &amp; Khatam Al-Quran <span>Ramadan</span></h1>
+        <p>Pendaftaran akan dibuka selepas maklumat pakej dimuktamadkan.</p>
+        <div class="actions">
+          <a class="button" href="#pakej">Lihat Maklumat Pakej</a>
+          <button class="button secondary" type="button" data-open="bantuan">Perlu Bantuan Daftar?</button>
+        </div>
+      </div>
+      <div class="scene" aria-hidden="true">
+        <div class="moon"></div>
+        <span class="star one">✦</span><span class="star two">✦</span><span class="star three">✧</span>
+        <div class="plinth"></div><div class="book"></div><div class="lantern"></div>
+      </div>
+    </section>
+    <div class="cards">
+      <section class="card" id="pakej" aria-labelledby="tajuk-pakej">
+        <h2 id="tajuk-pakej">Pakej penyertaan</h2>
+        <p>Butiran dan harga pakej akan dipaparkan di sini selepas diumumkan oleh Syafie Legacy.</p>
+      </section>
+      <section class="card" aria-labelledby="tajuk-daftar">
+        <h2 id="tajuk-daftar">Cara mendaftar</h2>
+        <p>Apabila dibuka, log masuk dengan Google, pilih pakej dan muat naik bukti bayaran. Urusetia akan semak pembayaran anda.</p>
+      </section>
+    </div>
+  </main>
+  <footer>Syafie Legacy</footer>
+</div>
+<dialog id="bantuan" aria-labelledby="tajuk-bantuan">
+  <h2 id="tajuk-bantuan">Bantuan pendaftaran</h2>
+  <p>Jika anda kurang biasa dengan borang dalam talian atau tiada akaun Google, Ustaz Shafie boleh daftarkan bagi pihak anda apabila pendaftaran dibuka.</p>
+  <form method="dialog"><button class="button" autofocus>Tutup</button></form>
+</dialog>
+<dialog id="urusetia" aria-labelledby="tajuk-urusetia">
+  <h2 id="tajuk-urusetia">Akses Urusetia</h2>
+  <p>Log masuk Google urusetia, pendaftaran bagi pihak peserta dan semakan bayaran belum dibuka.</p>
+  <form method="dialog"><button class="button" autofocus>Tutup</button></form>
+</dialog>
+<script>
+  for (const button of document.querySelectorAll('[data-open]')) {
+    button.addEventListener('click', () => {
+      document.getElementById(button.dataset.open).showModal();
+    });
+  }
+</script>
+</body>
+</html>
