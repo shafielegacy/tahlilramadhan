@@ -59,3 +59,22 @@
 @media(max-width:780px){.auth-shell,.auth-shell:has(#daftar:not([hidden])){grid-template-columns:1fr;min-height:0;border-radius:1.3rem}.auth-showcase,.auth-shell--staff .auth-showcase{order:0;min-height:190px;gap:.5rem;padding:1.5rem 1.7rem}.auth-content,.auth-shell--staff .auth-content{order:1;padding:1.6rem}.auth-motif{position:absolute;right:.6rem;top:1.5rem;width:7rem;opacity:.27}.auth-mosque,.auth-shell:has(#daftar:not([hidden])) .auth-mosque{font-size:4.2rem}.auth-showcase h2{font-size:2.1rem;max-width:19rem}.auth-showcase p{max-width:21rem;font-size:.85rem}.auth-main{width:min(100% - 1rem,70rem)}}
 @media(max-width:430px){.auth-showcase{min-height:180px}.auth-content{padding:1.3rem}.auth-content h1{font-size:2.1rem}.auth-content .button{width:100%;min-width:0}.auth-showcase h2{font-size:1.9rem}.auth-main .home-link{margin-left:.35rem}}
 @media(prefers-reduced-motion:reduce){.auth-showcase,.auth-content,.auth-motif::before,.auth-mosque,.auth-content #daftar{animation:none!important;transition:none!important}}
+
+
+/* SL brand artwork: keep existing animated gold ring, replace centre glyph. */
+.auth-sl-logo{
+  display:block;
+  width:min(63%,10.5rem);
+  max-height:70%;
+  height:auto;
+  aspect-ratio:1;
+  object-fit:contain;
+  border-radius:1rem;
+  background:#fff;
+  padding:.35rem;
+  box-shadow:0 12px 30px #0006,0 0 25px #efc67b30;
+  animation:auth-float 5s ease-in-out infinite;
+}
+@media(max-width:780px){
+  .auth-sl-logo{width:min(68%,6.5rem);padding:.2rem;border-radius:.65rem}
+}
