@@ -24,6 +24,7 @@
   }
 
   function showDashboard(email) {
+    document.querySelector('.auth-shell')?.classList.add('is-authenticated');
     document.getElementById('tajuk').textContent = 'Dashboard Urusetia';
     document.getElementById('intro').textContent = 'Log masuk sebagai ' + email;
     document.getElementById('login-actions').style.display = 'none';
