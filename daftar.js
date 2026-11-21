@@ -14,8 +14,12 @@
       method: 'POST', credentials: 'omit', body: JSON.stringify(data),
       signal: AbortSignal.timeout(45000)
     });
-    if (!response.ok) throw new Error('Request failed');
-    return response.json();
+    if (!response.ok) throw new Error('HTTP-' + response.status);
+    try {
+      return await response.json();
+    } catch {
+      throw new Error('RESPONS');
+    }
   }
 
   async function loadPackages() {
@@ -89,7 +93,7 @@
       const file = await new Promise((resolve, reject) => {
         const reader = new FileReader();
         reader.onload = () => resolve(reader.result.split(',')[1]);
-        reader.onerror = reject;
+        reader.onerror = () => reject(new Error('FAIL-SLIP'));
         reader.readAsDataURL(proof);
       });
       const details = Object.fromEntries(['packageId', 'name', 'phone', 'names']
@@ -108,10 +112,12 @@
       } else if (result.status === 'invalid') {
         status.textContent = 'Semak maklumat peserta, nama arwah dan format bukti bayaran.';
       } else {
-        throw new Error('Registration failed');
+        throw new Error('SERVIS');
       }
-    } catch {
-      status.textContent = 'Pendaftaran belum dapat disahkan. Cuba hantar semula dari halaman ini.';
+    } catch (error) {
+      const known = /^(HTTP-\d{3}|RESPONS|FAIL-SLIP|SERVIS)$/.test(error.message);
+      const code = known ? error.message : error.name === 'TimeoutError' ? 'TAMAT-MASA' : 'SAMBUNGAN';
+      status.textContent = 'Pendaftaran belum dapat disahkan (' + code + '). Cuba hantar semula dari halaman ini.';
     } finally {
       if (indicator) indicator.hidden = true;
       form.removeAttribute('aria-busy');
