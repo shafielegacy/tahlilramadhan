@@ -2,6 +2,7 @@
   const form = document.getElementById('daftar');
   const status = document.getElementById('status');
   const button = form.querySelector('button');
+  const indicator = document.getElementById('submit-indicator');
   const field = id => document.getElementById(id);
   const endpoint = window.urusetiaConfig?.endpoint;
   const key = crypto.randomUUID();
@@ -81,6 +82,8 @@
       return;
     }
     button.disabled = true;
+    form.setAttribute('aria-busy', 'true');
+    if (indicator) indicator.hidden = false;
     status.textContent = 'Menghantar pendaftaran…';
     try {
       const file = await new Promise((resolve, reject) => {
@@ -110,6 +113,8 @@
     } catch {
       status.textContent = 'Pendaftaran belum dapat disahkan. Cuba hantar semula dari halaman ini.';
     } finally {
+      if (indicator) indicator.hidden = true;
+      form.removeAttribute('aria-busy');
       button.disabled = false;
     }
   });
