@@ -61,7 +61,9 @@ test('Drive/Docs links require exact Google host and HTTPS', () => {
 function fakeFile(bytes, name, type) {
   return {
     name, type, size: bytes.length,
-    slice: () => ({ arrayBuffer: async () => Uint8Array.from(bytes).buffer })
+    slice: (start = 0, end = bytes.length) => ({
+      arrayBuffer: async () => Uint8Array.from(bytes.slice(start, end)).buffer
+    })
   };
 }
 
