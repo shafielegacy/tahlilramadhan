@@ -53,6 +53,17 @@ Dikemas kini pada **21 November 2026 (MYT)**. Portal Syafie Legacy menggunakan G
 
 Frontend hardening telah dipush ke GitHub. **Belum security-signed-off** kerana source lengkap Apps Script V9 yang digunakan LIVE tidak ada di repo dan kawalan server-side belum dapat diverifikasi. Rujuk [laporan security audit](SECURITY_AUDIT_2026-11-21.md). Jangan deploy fail sejarah `apps-script/UrusetiaAuth.gs` sebagai pengganti V9.
 
+## UI Login Motion V2 — 21 November 2026
+
+**Status:** Dikemaskini terus pada GitHub Pages branch `main` (tanpa branch testing). Rujukan gaya: video React login split-panel yang diberikan pengguna. Implementasi menggunakan HTML/CSS/JS asal, **bukan migrasi React**.
+
+- `daftar.html`: panel kiri bertema emerald-gold Ramadan, login Google/borang peserta di panel kanan; animasi masuk dari dua arah. Selepas Google login, borang sedia ada kekal, dengan susun atur panel lebih luas untuk borang.
+- `urusetia.html`: split-panel terbalik untuk login Urusetia; panel hiasan hilang dan dashboard dibesarkan hanya selepas `urusetiaSession`/Google login berjaya.
+- `auth-motion.css`: gaya animasi, responsive mobile dan `prefers-reduced-motion`.
+- `urusetia.js`: UI-only class pada `showDashboard`, tidak mengubah endpoint, token, scope, keputusan authorisation, payload bayaran atau resit.
+- **Static sanity readback:** kehadiran ID DOM penting, import CSS, JS syntax dan UI auth-state class PASS. Bukan bukti ujian interaksi/live login atau security sign-off.
+- **Safety:** Apps Script V9, Script Properties, OAuth, Sheets, Drive, AutoCrat, data sebenar **tidak diubah**. Backend security sign-off kekal pending seperti laporan security audit.
+
 ## To-do
 
 - [ ] **Minta Pembetulan Slip** — simpan sebab pembetulan, benarkan peserta menggantikan slip pada rujukan yang sama, kemudian kembalikan rekod ke Semakan Bayaran.
