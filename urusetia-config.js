@@ -1,1 +1,1 @@
-window.urusetiaConfig = Object.freeze({ clientId: '1601037995-efmjnhnuu3bll28vg6diq28qp6qujoo9.apps.googleusercontent.com', endpoint: '' });
+window.urusetiaConfig = Object.freeze({ clientId: '1601037995-efmjnhnuu3bll28vg6diq28qp6qujoo9.apps.googleusercontent.com', endpoint: 'https://script.google.com/macros/s/AKfycbzGYACaqwkP7qD2OPNCFdydARHkzE8ghOD7u0D40dKBee8FsnLELS6N8wnrRR0-e1Fw/exec' });
