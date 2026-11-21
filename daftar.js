@@ -11,6 +11,7 @@
   const endpoint = window.urusetiaConfig?.endpoint;
   const key = crypto.randomUUID();
   const login = field('google-login');
+  const assisted = new URLSearchParams(location.search).get('bantuan') === '1';
   let session = '';
 
   async function request(data) {
@@ -26,15 +27,40 @@
     }
   }
 
+  function showAssistedSignIn() {
+    login.textContent = 'Ke Dashboard Urusetia';
+    login.hidden = false;
+    login.onclick = () => { location.href = './urusetia.html'; };
+  }
+
   async function loadPackages() {
     try {
+      if (assisted) {
+        field('registration-title').textContent = 'Daftar Bagi Pihak Peserta';
+        const back = field('registration-back');
+        back.href = './urusetia.html';
+        back.textContent = '← Dashboard Urusetia';
+        session = sessionStorage.getItem('tahlil-urusetia-session') || '';
+        if (!session || (await request({ action: 'urusetiaSession', session })).status !== 'ok') {
+          status.textContent = 'Log masuk sebagai urusetia untuk sambung.';
+          showAssistedSignIn();
+          return;
+        }
+      }
       const result = await request({ action: 'tahlilPackages' });
       if (result.status !== 'ok' || !result.open || !result.packages.length) {
         status.textContent = 'Pendaftaran belum dibuka.';
         return;
       }
       for (const item of result.packages) field('packageId').add(new Option(item.name, item.id));
-      setupGoogleLogin();
+      if (assisted) {
+        field('email').readOnly = false;
+        field('registration-email-label').textContent = 'E-mel peserta untuk resit';
+        status.textContent = '';
+        form.hidden = false;
+      } else {
+        setupGoogleLogin();
+      }
     } catch {
       status.textContent = 'Status pendaftaran tidak dapat disemak. Sila cuba semula.';
     }
@@ -118,14 +144,18 @@
       const details = Object.fromEntries(['packageId', 'name', 'phone', 'names']
         .map(id => [id, field(id).value]));
       if (dialog) dialogMessage.textContent = 'Memuat naik bukti bayaran dan menyimpan permohonan…';
-      const result = await request({ action: 'tahlilRegister', ...details, session, key, mime: proof.type, file });
+      const result = await request({
+        action: assisted ? 'tahlilAssistedRegister' : 'tahlilRegister',
+        ...details, ...(assisted ? { email: field('email').value } : {}), session, key, mime: proof.type, file
+      });
       if (result.status === 'ok') {
         outcome = 'Permohonan diterima';
         form.hidden = true;
         status.textContent = 'Pendaftaran diterima dan sedang menunggu semakan. No. rujukan ' + result.reference;
-      } else if (result.status === 'login_required') {
+      } else if (result.status === 'login_required' || result.status === 'denied') {
         form.hidden = true;
-        login.hidden = false;
+        if (assisted) showAssistedSignIn();
+        else login.hidden = false;
         status.textContent = 'Sesi tamat. Log masuk semula untuk teruskan.';
       } else if (result.status === 'closed') {
         form.hidden = true;
