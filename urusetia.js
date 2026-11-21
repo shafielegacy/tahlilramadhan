@@ -86,6 +86,24 @@
     });
   }
 
+  // Treat links returned by the API as untrusted data, even for authenticated staff.
+  function safeGoogleDocumentUrl(value) {
+    if (typeof value !== 'string' || value.length > 2048) return null;
+    try {
+      const url = new URL(value);
+      if (url.protocol !== 'https:' || url.username || url.password || url.port ||
+          !['drive.google.com', 'docs.google.com'].includes(url.hostname)) return null;
+      return url.href;
+    } catch {
+      return null;
+    }
+  }
+
+  function validPaymentAmount(value) {
+    return Number.isFinite(value) && value > 0 && value <= 100000 &&
+      Math.round(value * 100) === value * 100;
+  }
+
   function paymentForm(item, session, feedback) {
     const form = document.createElement('form');
     const heading = document.createElement('h3');
@@ -93,14 +111,15 @@
     const info = document.createElement('p');
     info.textContent = item.package + ' · ' + item.reference;
     form.append(heading, info);
-    if (!/^https:\/\/drive\.google\.com\//.test(item.proof)) {
+    const proofUrl = safeGoogleDocumentUrl(item.proof);
+    if (!proofUrl || new URL(proofUrl).hostname !== 'drive.google.com') {
       const missing = document.createElement('p');
       missing.textContent = 'Pautan bukti bayaran tiada.';
       form.append(missing);
       return form;
     }
     const proof = document.createElement('a');
-    proof.href = item.proof;
+    proof.href = proofUrl;
     proof.target = '_blank';
     proof.rel = 'noopener noreferrer';
     proof.textContent = 'Buka bukti bayaran';
@@ -120,6 +139,11 @@
     form.addEventListener('submit', async event => {
       event.preventDefault();
       const approvedAmount = amount.valueAsNumber;
+      if (!validPaymentAmount(approvedAmount)) {
+        feedback.textContent = 'Amaun tidak sah. Masukkan nilai RM0.01 hingga RM100,000.00 dengan dua tempat perpuluhan.';
+        amount.focus();
+        return;
+      }
       if (!await confirmPayment('Sahkan bayaran RM' + approvedAmount.toFixed(2) + ' untuk ' + item.name + '?')) return;
       button.disabled = true;
       showPaymentDialog('Sedang mengesahkan bayaran…', 'Menyimpan pengesahan dan menyediakan nombor resit…', 'loading');
@@ -200,9 +224,10 @@
       : item.payment;
     state.textContent = [label, item.receipt, item.amount ? 'RM' + item.amount : ''].filter(Boolean).join(' · ');
     row.append(name, details, state);
-    if (/^https:\/\/(?:drive|docs)\.google\.com\//.test(item.pdf)) {
+    const pdfUrl = safeGoogleDocumentUrl(item.pdf);
+    if (pdfUrl) {
       const link = document.createElement('a');
-      link.href = item.pdf;
+      link.href = pdfUrl;
       link.target = '_blank';
       link.rel = 'noopener noreferrer';
       link.textContent = 'Buka PDF';
