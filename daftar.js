@@ -44,6 +44,9 @@
   }
 
   function showAssistedSignIn() {
+    // This is navigation, not Google OAuth: use an ordinary secondary button.
+    login.classList.remove('google-signin-3d');
+    login.classList.add('button', 'secondary');
     login.textContent = 'Ke Dashboard Urusetia';
     login.hidden = false;
     login.onclick = () => { location.href = './urusetia.html'; };
