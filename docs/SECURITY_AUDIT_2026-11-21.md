@@ -30,6 +30,12 @@
 | SEC-01 | Repo-wide secret scan termasuk sejarah git, Dependabot/CodeQL | NOT VERIFIED | Belum dijalankan imbasan menyeluruh |
 | LIVE-01 | Ujian production Google login/registration/receipt selepas patch | NOT VERIFIED | Tidak diuji untuk elak gangguan data LIVE |
 
+## Regression automation added
+- `tests/security-guards.test.cjs` menggunakan built-in Node.js `node:test`; ia memuatkan helper sebenar daripada source `urusetia.js` dan `daftar.js` untuk negative/positive test.
+- `.github/workflows/frontend-security.yml` menjalankan `node --test tests/security-guards.test.cjs` pada push dan pull request ke `main`, tanpa secrets, backend calls atau produksi.
+- **Status GitHub Actions: NOT VERIFIED**, kerana keputusan workflow run yang lengkap belum dapat dibaca. Jangan tandakan CI PASS sehingga run sebenar dilihat.
+- Dua fail PDF resit contoh turut disemak pada metadata permission: hanya akses `user` owner/writer diperhatikan; tiada broad permission dalam metadata yang diterima. Ini tidak membuktikan semua resit atau semua fail sudah diperiksa.
+
 ## Risks and required controls (urut keutamaan)
 ### P0 — sebelum sebarang dakwaan sistem selamat
 - Dapatkan **source sebenar Apps Script V9** dan pastikan build/version yang sama dengan deployment LIVE. Simpan sanitized snapshot source (tanpa secrets atau data peserta) di direktori backend repo dan padankan version/deployment audit trail.
