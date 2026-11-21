@@ -78,3 +78,73 @@
 @media(max-width:780px){
   .auth-sl-logo{width:min(68%,6.5rem);padding:.2rem;border-radius:.65rem}
 }
+
+
+/* Google sign-in: 3D visual only, original OAuth click handlers retained. */
+.google-signin-3d{
+  position:relative;isolation:isolate;display:inline-flex;align-items:center;
+  width:min(100%,28rem);min-height:4.65rem;padding:.3rem 1.05rem .3rem .3rem;
+  gap:.9rem;overflow:hidden;border:1px solid #a7c5ff;border-radius:1.05rem;
+  background:linear-gradient(160deg,#70a6ff 0%,#4e88ed 51%,#386bcd 100%);
+  box-shadow:inset 0 2px 1px #ffffff7a,inset 0 -2px 0 #234b9a,
+    0 6px 0 #244e99,0 13px 20px #081d4660;
+  color:#fff;font:700 clamp(1rem,2.1vw,1.15rem)/1.25 system-ui,sans-serif;
+  cursor:pointer;text-align:center;text-shadow:0 1px 1px #173d8d88;
+  transform:translateY(0);
+  transition:transform .18s ease,box-shadow .18s ease,filter .18s ease;
+}
+.google-signin-3d::before{
+  content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;
+  background:linear-gradient(175deg,#ffffff38,transparent 42%,#003e9b16);
+}
+.google-signin-3d::after{
+  content:"";position:absolute;top:-70%;left:-38%;width:32%;height:250%;
+  transform:translateX(-170%) rotate(22deg);pointer-events:none;
+  background:linear-gradient(90deg,transparent,#ffffff55,transparent);
+  opacity:.8;animation:google-button-shine 6s ease-in-out infinite;
+}
+.google-signin-3d__tile{
+  position:relative;z-index:1;display:grid;place-items:center;flex:0 0 4.05rem;
+  width:4.05rem;height:3.95rem;padding:.65rem;border-radius:.8rem;
+  background:linear-gradient(155deg,#fff,#f3f6fd);
+  border:1px solid #d6dfec;
+  box-shadow:inset 0 1px #fff,0 2px 0 #cad4e4,0 5px 13px #081d4633;
+}
+.google-brand-icon{display:block;width:100%;height:100%;filter:drop-shadow(0 1px 0 #ffffffad)}
+.google-signin-3d__label{position:relative;z-index:1;flex:1;min-width:0;white-space:normal}
+.google-signin-3d__chevron{
+  position:relative;z-index:1;font-size:2rem;line-height:1;color:#ecf3ff;
+  transition:transform .18s ease;
+}
+@media(hover:hover){
+  .google-signin-3d:hover:not(:disabled){
+    transform:translateY(-3px);filter:brightness(1.05);
+    box-shadow:inset 0 2px 1px #ffffff99,inset 0 -2px 0 #234b9a,
+      0 9px 0 #244e99,0 18px 28px #081d4673;
+  }
+  .google-signin-3d:hover:not(:disabled) .google-signin-3d__chevron{transform:translateX(3px)}
+}
+.google-signin-3d:active:not(:disabled){
+  transform:translateY(5px);
+  box-shadow:inset 0 2px 1px #ffffff44,inset 0 -1px #234b9a,
+    0 1px 0 #244e99,0 5px 10px #081d4659;
+}
+.google-signin-3d:focus-visible{outline:3px solid #f6cb83;outline-offset:5px}
+.google-signin-3d:disabled{opacity:.75;cursor:wait;filter:saturate(.75)}
+.google-signin-3d[hidden]{display:none!important}
+.auth-content .google-signin-3d,.auth-shell--staff .auth-content #login-actions .google-signin-3d{
+  width:100%;max-width:28rem;
+}
+@keyframes google-button-shine{
+  0%,74%{transform:translateX(-170%) rotate(22deg)}
+  88%,100%{transform:translateX(550%) rotate(22deg)}
+}
+@media(max-width:480px){
+  .google-signin-3d{min-height:4.15rem;gap:.55rem;padding:.23rem .7rem .23rem .23rem;font-size:.95rem}
+  .google-signin-3d__tile{flex-basis:3.55rem;width:3.55rem;height:3.55rem;padding:.55rem;border-radius:.7rem}
+  .google-signin-3d__chevron{font-size:1.65rem}
+}
+@media(prefers-reduced-motion:reduce){
+  .google-signin-3d,.google-signin-3d__chevron{transition:none!important}
+  .google-signin-3d::after{animation:none!important;opacity:0}
+}
