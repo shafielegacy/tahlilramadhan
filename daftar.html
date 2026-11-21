@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="ms"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="referrer" content="no-referrer"><title>Pendaftaran Tahlil Ramadan 1448H</title><link rel="stylesheet" href="portal.css"><style>
+<html lang="ms"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="referrer" content="no-referrer"><title>Pendaftaran Tahlil Ramadan 1448H</title><link rel="stylesheet" href="portal.css"><link rel="stylesheet" href="./auth-motion.css?v=ramadan-v2"><style>
 main{max-width:680px;margin:2rem auto;padding:1rem}label{display:grid;gap:.4rem;margin:1rem 0}input,textarea,select{font:inherit;padding:.7rem;border-radius:.5rem;color:#142b23;background:#fff8e7;width:100%;box-sizing:border-box}[hidden]{display:none!important}textarea{resize:vertical}
 .home-link{display:inline-flex;align-items:center;gap:.55rem;margin:0 0 .9rem;padding:.55rem .9rem;border:1px solid #c5a562;border-radius:.65rem;background:#173d32;color:#fff1c9;text-decoration:none;font-weight:700;line-height:1.25;box-shadow:0 2px 5px #0003}
 .home-link:hover{background:#285246;color:#fff8e7}
@@ -12,9 +12,25 @@ main{max-width:680px;margin:2rem auto;padding:1rem}label{display:grid;gap:.4rem;
 @keyframes submission-spin{to{transform:rotate(360deg)}}
 @media(prefers-reduced-motion:reduce){.submission-spinner{animation:none}}
 </style><script src="urusetia-config.js" defer></script><script defer src="daftar.js?v=bantuan1"></script></head>
-<body><main><a id="registration-back" class="home-link" href="./"><span aria-hidden="true">←</span> Laman Utama</a><h1 id="registration-title">Pendaftaran Tahlil Ramadan 1448H</h1><p id="status" role="status">Menyemak status pendaftaran…</p>
-<button id="google-login" class="button" type="button" hidden>Log Masuk dengan Google</button>
-<form id="daftar" hidden><label>Pakej penyertaan<select id="packageId" required></select></label><label>Nama peserta<input id="name" autocomplete="name" maxlength="160" required></label><label><span id="registration-email-label">E-mel</span><input id="email" type="email" autocomplete="email" maxlength="254" readonly required></label><label>Nombor WhatsApp<input id="phone" type="tel" autocomplete="tel" maxlength="35" required></label><label>Nama arwah, satu nama setiap baris<textarea id="names" rows="5" maxlength="10000" required></textarea></label><label>Bukti bayaran (JPG, PNG atau PDF, maksimum 3 MB)<input id="proof" type="file" accept="image/jpeg,image/png,application/pdf" required></label><button class="button" type="submit">Hantar Pendaftaran</button></form>
+<body class="auth-page auth-participant"><main class="auth-main">
+<a id="registration-back" class="home-link" href="./"><span aria-hidden="true">←</span> Laman Utama</a>
+<div class="auth-shell">
+  <aside class="auth-showcase" aria-label="Tahlil Ramadan Syafie Legacy">
+    <span class="auth-eyebrow">Syafie Legacy · Ramadan 1448H</span>
+    <div class="auth-motif" aria-hidden="true"><span class="auth-mosque">☪</span></div>
+    <div><h2>Ramadan penuh <span class="auth-accent">keberkatan.</span></h2>
+    <p>Daftarkan penyertaan Tahlil &amp; Khatam Al-Quran dengan mudah, tersusun dan selamat.</p></div>
+  </aside>
+  <section class="auth-content" aria-label="Daftar peserta">
+    <span class="auth-eyebrow">PORTAL PENYERTAAN</span>
+    <h1 id="registration-title">Pendaftaran Tahlil Ramadan 1448H</h1>
+    <p class="auth-description">Log masuk dengan Google untuk meneruskan pendaftaran. Tiada kata laluan baharu diperlukan.</p>
+    <p id="status" role="status" aria-live="polite">Menyemak status pendaftaran…</p>
+    <button id="google-login" class="button auth-google" type="button" hidden><span class="auth-google-mark" aria-hidden="true">G</span> Log Masuk dengan Google</button>
+    <p class="auth-hint">Urusetia? <a href="./urusetia.html">Log masuk ke Dashboard Urusetia</a></p>
+    <form id="daftar" hidden><label>Pakej penyertaan<select id="packageId" required></select></label><label>Nama peserta<input id="name" autocomplete="name" maxlength="160" required></label><label><span id="registration-email-label">E-mel</span><input id="email" type="email" autocomplete="email" maxlength="254" readonly required></label><label>Nombor WhatsApp<input id="phone" type="tel" autocomplete="tel" maxlength="35" required></label><label>Nama arwah, satu nama setiap baris<textarea id="names" rows="5" maxlength="10000" required></textarea></label><label>Bukti bayaran (JPG, PNG atau PDF, maksimum 3 MB)<input id="proof" type="file" accept="image/jpeg,image/png,application/pdf" required></label><button class="button" type="submit">Hantar Pendaftaran</button></form>
+  </section>
+</div>
 <dialog id="submission-dialog" class="submission-dialog" aria-labelledby="submission-title" aria-describedby="submission-message">
   <span id="submission-spinner" class="submission-spinner" aria-hidden="true" hidden></span>
   <h2 id="submission-title">Status Permohonan</h2>
