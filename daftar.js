@@ -27,6 +27,22 @@
     }
   }
 
+  // Usability guard only: the Apps Script backend MUST independently validate bytes,
+  // size, MIME, and permissions. Browser checks are never a security boundary.
+  async function recognisedProof(file) {
+    if (!file || file.size < 8 || file.size > 3 * 1024 * 1024) return false;
+    const bytes = new Uint8Array(await file.slice(0, 8).arrayBuffer());
+    const png = bytes.every((byte, i) => byte === [137, 80, 78, 71, 13, 10, 26, 10][i]);
+    const jpg = bytes[0] === 255 && bytes[1] === 216 && bytes[2] === 255;
+    const pdf = bytes[0] === 37 && bytes[1] === 80 && bytes[2] === 68 &&
+      bytes[3] === 70 && bytes[4] === 45;
+    const ext = (file.name.split('.').pop() || '').toLowerCase();
+    if (png) return ext === 'png' && (!file.type || file.type === 'image/png');
+    if (jpg) return ['jpg', 'jpeg'].includes(ext) && (!file.type || file.type === 'image/jpeg');
+    if (pdf) return ext === 'pdf' && (!file.type || file.type === 'application/pdf');
+    return false;
+  }
+
   function showAssistedSignIn() {
     login.textContent = 'Ke Dashboard Urusetia';
     login.hidden = false;
@@ -125,8 +141,8 @@
   form.addEventListener('submit', async event => {
     event.preventDefault();
     const proof = field('proof').files[0];
-    if (!proof || proof.size > 3 * 1024 * 1024) {
-      status.textContent = 'Pilih bukti bayaran yang tidak melebihi 3 MB.';
+    if (!proof || !(await recognisedProof(proof))) {
+      status.textContent = 'Bukti bayaran mesti fail JPG, PNG atau PDF sah dan tidak melebihi 3 MB.';
       return;
     }
     button.disabled = true;
