@@ -112,10 +112,10 @@
       } else if (result.status === 'invalid') {
         status.textContent = 'Semak maklumat peserta, nama arwah dan format bukti bayaran.';
       } else {
-        throw new Error('SERVIS');
+        throw new Error(/^DAFTAR-(PERSEDIAAN|SIBUK|CARIAN|SLIP|REKOD)$/.test(result.code) ? result.code : 'SERVIS');
       }
     } catch (error) {
-      const known = /^(HTTP-\d{3}|RESPONS|FAIL-SLIP|SERVIS)$/.test(error.message);
+      const known = /^(HTTP-\d{3}|RESPONS|FAIL-SLIP|SERVIS|DAFTAR-(?:PERSEDIAAN|SIBUK|CARIAN|SLIP|REKOD))$/.test(error.message);
       const code = known ? error.message : error.name === 'TimeoutError' ? 'TAMAT-MASA' : 'SAMBUNGAN';
       status.textContent = 'Pendaftaran belum dapat disahkan (' + code + '). Cuba hantar semula dari halaman ini.';
     } finally {
