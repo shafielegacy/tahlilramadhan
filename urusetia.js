@@ -101,7 +101,7 @@
 
   function validPaymentAmount(value) {
     return Number.isFinite(value) && value > 0 && value <= 100000 &&
-      Math.round(value * 100) === value * 100;
+      Math.abs(Math.round(value * 100) - value * 100) < 1e-7;
   }
 
   function paymentForm(item, session, feedback) {
