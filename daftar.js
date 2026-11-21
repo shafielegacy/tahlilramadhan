@@ -2,7 +2,11 @@
   const form = document.getElementById('daftar');
   const status = document.getElementById('status');
   const button = form.querySelector('button');
-  const indicator = document.getElementById('submit-indicator');
+  const dialog = document.getElementById('submission-dialog');
+  const dialogTitle = document.getElementById('submission-title');
+  const dialogMessage = document.getElementById('submission-message');
+  const spinner = document.getElementById('submission-spinner');
+  const close = document.getElementById('submission-close');
   const field = id => document.getElementById(id);
   const endpoint = window.urusetiaConfig?.endpoint;
   const key = crypto.randomUUID();
@@ -78,6 +82,20 @@
     document.head.appendChild(script);
   }
 
+  dialog?.addEventListener('cancel', event => {
+    if (button.disabled) event.preventDefault();
+  });
+
+  function showSubmissionStatus(title, message, pending = false) {
+    if (!dialog) return;
+    dialogTitle.textContent = title;
+    dialogMessage.textContent = message;
+    spinner.hidden = !pending;
+    close.hidden = pending;
+    if (!dialog.open) dialog.showModal();
+    if (!pending) close.focus();
+  }
+
   form.addEventListener('submit', async event => {
     event.preventDefault();
     const proof = field('proof').files[0];
@@ -87,8 +105,9 @@
     }
     button.disabled = true;
     form.setAttribute('aria-busy', 'true');
-    if (indicator) indicator.hidden = false;
     status.textContent = 'Menghantar pendaftaran…';
+    showSubmissionStatus('Sedang menghantar permohonan…', 'Menyediakan bukti bayaran. Sila tunggu.', true);
+    let outcome = 'Permohonan belum dapat disahkan';
     try {
       const file = await new Promise((resolve, reject) => {
         const reader = new FileReader();
@@ -98,8 +117,10 @@
       });
       const details = Object.fromEntries(['packageId', 'name', 'phone', 'names']
         .map(id => [id, field(id).value]));
+      if (dialog) dialogMessage.textContent = 'Memuat naik bukti bayaran dan menyimpan permohonan…';
       const result = await request({ action: 'tahlilRegister', ...details, session, key, mime: proof.type, file });
       if (result.status === 'ok') {
+        outcome = 'Permohonan diterima';
         form.hidden = true;
         status.textContent = 'Pendaftaran diterima dan sedang menunggu semakan. No. rujukan ' + result.reference;
       } else if (result.status === 'login_required') {
@@ -119,9 +140,9 @@
       const code = known ? error.message : error.name === 'TimeoutError' ? 'TAMAT-MASA' : 'SAMBUNGAN';
       status.textContent = 'Pendaftaran belum dapat disahkan (' + code + '). Cuba hantar semula dari halaman ini.';
     } finally {
-      if (indicator) indicator.hidden = true;
       form.removeAttribute('aria-busy');
       button.disabled = false;
+      showSubmissionStatus(outcome, status.textContent);
     }
   });
 
