@@ -1,20 +1,61 @@
-# Dashboard Tahlil & Khatam Al-Quran Ramadan
+# Operasi Tahlil & Khatam Al-Quran Ramadan 1448H
 
-Portal Syafie Legacy menyediakan halaman peserta dan urusetia di GitHub Pages.
+Dikemas kini pada **21 November 2026 (MYT)**. Portal Syafie Legacy menggunakan GitHub Pages untuk paparan, Google Apps Script **V9** untuk log masuk dan urusan pendaftaran, serta Google Sheets, Drive dan AutoCrat untuk rekod dan resit.
 
-## Aliran penggunaan
+## Akses
 
-| Pengguna | Aliran sasaran |
+- [Laman utama](https://shafielegacy.github.io/tahlilramadhan/)
+- [Borang peserta](https://shafielegacy.github.io/tahlilramadhan/daftar.html)
+- [Dashboard Urusetia](https://shafielegacy.github.io/tahlilramadhan/urusetia.html)
+- [Borang daftar bagi pihak ketiga](https://shafielegacy.github.io/tahlilramadhan/daftar.html?bantuan=1)
+- [WhatsApp Ustaz Shafie](https://tahlilsyafielegacy.wasap.my)
+
+## Status pelaksanaan
+
+| Bahagian | Status setakat 21 November |
 | --- | --- |
-| Peserta | Lihat pakej, log masuk Google, isi maklumat, muat naik bukti bayaran dan semak status pendaftaran. |
-| Urusetia | Log masuk Google, daftar bagi pihak peserta dan semak bukti bayaran. |
+| Pendaftaran peserta | Terbuka untuk Ramadan 1448H. Google Sign-In mengisi e-mel peserta; borang menyimpan pakej, nama, nombor WhatsApp, senarai nama arwah dan slip JPG, PNG atau PDF sehingga 3 MB. Pendaftaran sebenar berjaya menghasilkan nombor rujukan. |
+| Harga pakej | RM50, RM70 dan RM100 dibaca daripada tab `PAKEJ`. Had nama khusus setiap pakej belum ditetapkan. |
+| Maklum balas penghantaran | Popup menunjukkan penyediaan slip, proses penghantaran dan hasil akhir. Kod ralat dipaparkan jika penghantaran gagal. |
+| Nombor rujukan | Rujukan baharu menggunakan format pendek `THL-XXXXXXXXXXXX`. Rujukan lama dengan UUID penuh kekal diterima untuk semakan. Format pendek diterbitkan dalam V7, dengan penghantaran pertama bagi format itu belum disahkan secara khusus. |
+| Pengesahan bayaran | Urusetia buka slip, masukkan amaun sebenar dan sahkan melalui popup. Dua rekod RM50 disahkan dengan nombor resit `THL-1448H-0001` dan `THL-1448H-0002`. Pengulangan pengesahan mengembalikan nombor resit yang sama. |
+| Sejarah pendaftaran | Carian mengikut nama, e-mel, rujukan atau nombor resit. Paparan dan pautan **Buka PDF** dilihat pada dashboard live. Label **Resit Dihantar** bersumber daripada catatan `Emails Sent` AutoCrat. |
+| Daftar bagi pihak ketiga | Tersedia sejak Apps Script V9. Menggunakan sesi urusetia, merekodkan saluran `URUSETIA` dan memerlukan alamat e-mel peserta untuk resit. Akaun Google peserta tidak diperlukan. Aliran hantar hingga simpan belum disahkan dengan rekod sebenar. |
+| Navigasi urusetia | Tiga menu tersedia, iaitu **Semakan Bayaran**, **Sejarah Pendaftaran** dan **Daftar Bagi Pihak Ketiga**. Pintasan WhatsApp ada sebelah **Log Keluar**. |
+| Resit dan e-mel | Templat A6 landscape berlogo Syafie Legacy. Job AutoCrat **Resit Tahlil 1448H** dijalankan secara manual dan merekodkan PDF serta e-mel dihantar untuk kedua-dua resit di atas. |
+| Carian Google | Pemilikan Search Console disahkan melalui fail HTML dan permintaan indeks laman utama diterima. Status `URL is on Google` masih belum disahkan. Kekalkan fail pengesahan dalam repositori. |
+| Visual pakej | Poster portrait hijau-emas dengan RM50, RM70 dan RM100 kini dipaparkan di laman utama. Reka bentuk gantian ditangguhkan. |
 
-## Penggunaan setiap musim Ramadan
+## Aliran bayaran dan resit
 
-Satu portal dan satu akses urusetia digunakan semula setiap tahun. Reka bentuk yang dirancang menggunakan ID musim untuk mengaitkan pakej, pendaftaran dan semakan bayaran. Urusetia memilih musim aktif untuk pendaftaran dan boleh membuka musim terdahulu sebagai arkib. Harga dan had nama tahlil ditetapkan mengikut pakej bagi setiap musim.
+1. Peserta menghantar pendaftaran. Apps Script menyimpan slip di Drive dan menulis rekod `MENUNGGU SEMAKAN` ke tab `DAFTAR`.
+2. Urusetia menyemak slip dan klik **Sahkan Bayaran**. Apps Script mengisi nombor resit tetap mengikut turutan musim, tarikh resit dan amaun disahkan. Status bayaran menjadi `BAYARAN DISAHKAN` dan `STATUS_RESIT` menjadi `SEDIA`.
+3. Urusetia menjalankan job **Resit Tahlil 1448H** secara manual. Syarat merge ialah `STATUS_RESIT = SEDIA`; penerima e-mel menggunakan `<<EMAIL>>`. Job menjana fail PDF dan e-melkan sebagai lampiran.
+4. Gunakan kolum hasil merge AutoCrat atau **Sejarah Pendaftaran** untuk menyemak pautan PDF dan penghantaran. `STATUS_RESIT` boleh kekal `SEDIA` selepas merge kerana AutoCrat menyimpan hasil dalam kolumnya sendiri. `URL_RESIT_PDF` belum diisi secara automatik.
 
-## Status
+| Tag templat | Kolum DAFTAR |
+| --- | --- |
+| `<<RESIT>>` | N — `RESIT` |
+| `<<TARIKH>>` | O — `TARIKH_RESIT` |
+| `<<PESERTA>>` | G — `NAMA_PESERTA` |
+| `<<PAKEJ>>` | E — `NAMA_PAKEJ` |
+| `<<RM>>` | P — `JUMLAH_DISAHKAN_RM` |
+| `<<EMAIL>>` | H — `EMAIL` |
 
-- Halaman utama dan halaman akses urusetia tersedia di GitHub Pages.
-- Kod pengesahan OAuth disimpan dalam projek Apps Script. Log masuk menunggu OAuth Web Client, deployment dan ujian akaun sebenar.
-- Pengurusan musim, pakej, pendaftaran, muat naik bukti dan semakan bayaran masih dalam skop pembangunan.
+## Tetapan dan penyelesaian masalah
+
+- Tab `MUSIM` menyimpan status buka atau tutup pendaftaran. Tab `PAKEJ` menyimpan data mengikut ID musim dan pakej. Backend semasa mengendalikan musim `1448H` secara khusus.
+- Apps Script menggunakan OAuth web client Tahlil dengan origin GitHub Pages. Client Secret dan senarai e-mel urusetia diurus dalam Script Properties.
+- Kod `DAFTAR-SLIP` pernah dikesan berpunca daripada kebenaran tulis Drive. Pemilik deployment memberikan kebenaran tersebut. Semakan tulis Drive dan penghantaran peserta selepas pembetulan berjaya.
+- AutoCrat kekal dalam **mod manual**. Time trigger belum diaktifkan atau diuji pada portal ini.
+
+## To-do
+
+- [ ] **Minta Pembetulan Slip** — simpan sebab pembetulan, benarkan peserta menggantikan slip pada rujukan yang sama, kemudian kembalikan rekod ke Semakan Bayaran.
+- [ ] **Semak Status Permohonan untuk peserta** — paparkan rekod milik akaun yang log masuk, sebab pembetulan jika ada, dan akses resit sendiri apabila tersedia.
+- [ ] **Sahkan pendaftaran dibantu** pada penggunaan sebenar — semak slip, e-mel dan saluran `URUSETIA` masuk ke rekod yang betul.
+- [ ] **Sahkan rujukan pendek** pada permohonan baharu dan semakan bayaran pertamanya.
+- [ ] **Muktamadkan pakej** dengan Ustaz jika harga, penerangan atau had nama perlu diubah.
+- [ ] **Semak status indeks** laman utama dalam Google Search Console.
+- [ ] **Reka semula poster pakej** apabila arah visual baharu dipilih.
+- [ ] **Persediaan musim akan datang** — pemilihan musim aktif dan paparan arkib masih belum dibina.
