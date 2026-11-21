@@ -1,3 +1,6 @@
+/* SECURITY NOTICE (2026-11-21): Historical example, NOT the deployed Tahlil V9 backend.
+   Its legacy doPost/sign-in route is incompatible with the current public UI.
+   Do not deploy or substitute this file for V9. See docs/SECURITY_AUDIT_2026-11-21.md. */
 /**
  * Deploy as a dedicated Apps Script web app executing as its owner.
  * Required Script Properties:
