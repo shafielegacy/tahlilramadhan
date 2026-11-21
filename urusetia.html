@@ -22,7 +22,13 @@
 .payment-dialog-actions{display:flex;flex-wrap:wrap;justify-content:center;gap:.75rem;margin-top:1rem}
 
 .season-view{margin:1rem 0;padding:1rem;border:1px solid #c8ae7466;border-radius:.85rem}
-.season-view select,#season-edit{max-width:100%;margin:.5rem 0}
+.season-view select,#season-edit{display:block;width:min(100%,26rem);max-width:100%;margin:.5rem 0}
+#dashboard .season-view label,#dashboard #tetapan-sesi label{color:#fff1cc;font-weight:650}
+#season-view,#season-edit,#season-form input:not([type="checkbox"]){padding:.7rem .8rem;border:1px solid #bda36b;border-radius:.65rem;background:#fff8e7;color:#17362d;font:inherit;min-height:3rem;color-scheme:light}
+#season-view:focus-visible,#season-edit:focus-visible,#season-form input:focus-visible{outline:3px solid #f6cb83;outline-offset:3px}
+#season-form input:disabled{opacity:.8}
+#season-form input[type="checkbox"]{width:1.15rem;height:1.15rem;accent-color:#f6cb83}
+#dashboard{overflow-wrap:anywhere}
 .season-form[hidden],.season-view[hidden]{display:none!important}
 .season-form{display:grid;gap:1rem}.season-form label{display:grid;gap:.4rem}
 .season-dates{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1rem}
