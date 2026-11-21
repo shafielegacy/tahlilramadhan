@@ -8,8 +8,17 @@
 <title>Akses Urusetia | Tahlil Ramadan</title>
 <link rel="stylesheet" href="./portal.css">
 <script src="./urusetia-config.js" defer></script>
-<script src="./urusetia.js?v=bayaran1" defer></script>
-</head>
+<script src="./urusetia.js?v=bayaran-popup1" defer></script>
+<style>.submission-dialog{box-sizing:border-box;width:min(28rem,calc(100% - 2rem));max-height:calc(100% - 2rem);padding:1.75rem;border:1px solid #ae9257;border-radius:1.25rem;background:#204238;color:#fff1cc;box-shadow:0 1rem 3rem #0008;text-align:center}
+.submission-dialog::backdrop{background:#081914c9}
+.submission-dialog h2{font-size:clamp(1.5rem,5vw,2rem);margin:.65rem 0}
+.submission-dialog p{color:#fff1cc;margin:.65rem 0 1rem}
+.submission-spinner{display:block;width:2.6rem;height:2.6rem;margin:.3rem auto 1rem;border:.2rem solid #ffda8f45;border-top-color:#ffda8f;border-radius:50%;animation:submission-spin .85s linear infinite}
+@keyframes submission-spin{to{transform:rotate(360deg)}}
+@media(prefers-reduced-motion:reduce){.submission-spinner{animation:none}}
+
+.payment-dialog-actions{display:flex;flex-wrap:wrap;justify-content:center;gap:.75rem;margin-top:1rem}
+</style></head>
 <body>
 <div class="wrap">
   <header>
@@ -35,5 +44,14 @@
   </main>
   <footer>Syafie Legacy</footer>
 </div>
+<dialog id="payment-dialog" class="submission-dialog" aria-labelledby="payment-dialog-title" aria-describedby="payment-dialog-message">
+  <span id="payment-spinner" class="submission-spinner" aria-hidden="true" hidden></span>
+  <h2 id="payment-dialog-title">Sahkan Bayaran</h2>
+  <p id="payment-dialog-message" role="status"></p>
+  <form method="dialog" class="payment-dialog-actions">
+    <button id="payment-cancel" class="button secondary" value="cancel" autofocus>Batal</button>
+    <button id="payment-confirm" class="button" value="confirm">Sahkan Bayaran</button>
+  </form>
+</dialog>
 </body>
 </html>
