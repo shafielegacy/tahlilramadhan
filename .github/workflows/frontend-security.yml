@@ -1,0 +1,16 @@
+name: Frontend security regression
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  security-guards:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check frontend security guards (no secrets or live API calls)
+        run: node --test tests/security-guards.test.cjs
