@@ -48,7 +48,7 @@ test('stale session response stops resubmission and asks for refreshed session',
  const f=registration({result:{status:'season_changed'}});await settle();await f.get('daftar').events.submit({preventDefault(){}});
  assert.equal(f.get('daftar').hidden,true);assert.equal(f.get('status').textContent.toLowerCase().includes('sesi'),true);
 });
-function staff(activeId='1448H'){
+function staff(activeId='1448H',options={}){
  const d=dom(),calls=[],store=new Map([['tahlil-urusetia-session','staff-session']]);
  const items=[{id:'1448H',name:'Ramadan 1448H',version:1,active:true,enabled:true,receiptReady:true,opensAt:'2026-11-21T11:00',closesAt:'2026-11-21T13:00'},
  {id:'1449H',name:'Ramadan 1449H',version:2,active:false,enabled:false,receiptReady:false,opensAt:'2027-11-21T11:00',closesAt:'2027-11-21T13:00'}];
@@ -57,8 +57,10 @@ function staff(activeId='1448H'){
   location:{pathname:'/urusetia.html',replace(){}},
   sessionStorage:{getItem:k=>store.get(k),setItem:(k,v)=>store.set(k,v),removeItem:k=>store.delete(k)},
   AbortSignal:{timeout:()=>({})},URL,Option:function(name,id){this.textContent=name;this.value=id;},
-  fetch:async(_url,options)=>{const p=JSON.parse(options.body);calls.push(p);
-   return {ok:true,json:async()=>p.action==='urusetiaSession'?{status:'ok',email:'staff@example.test'}:p.action==='tahlilSeasonList'?{status:'ok',items,activeId}:p.action==='tahlilSeasonSave'?{status:'ok'}:{status:'ok',items:[],total:0}};
+  fetch:async(_url,requestOptions)=>{const p=JSON.parse(requestOptions.body);calls.push(p);
+   if(p.action==='tahlilSeasonSave'&&options.activeAfterSave){activeId=options.activeAfterSave;items.forEach(s=>{s.active=s.id===activeId;});}
+   if((p.action==='tahlilSeasonList'&&options.failCatalogue)||(p.action==='tahlilPaymentQueue'&&p.seasonId===options.failQueueOn))return {ok:true,json:async()=>({status:'error'})};
+   return {ok:true,json:async()=>p.action==='urusetiaSession'?{status:'ok',email:'staff@example.test'}:p.action==='tahlilSeasonList'?{status:'ok',items,activeId}:p.action==='tahlilSeasonSave'?{status:'ok'}:p.action==='tahlilPaymentQueue'?{status:'ok',items:options.queueItems||[]}:{status:'ok',items:[],total:0}};
   }
  });
  vm.runInContext(read('urusetia.js'),context);return {...d,calls};
@@ -94,4 +96,24 @@ test('future season updates public labels and hides the old-year poster',async()
  assert.equal(d.get('season-name').textContent,'Ramadan 1449H');assert.equal(poster.hidden,true);
  assert.equal(d.get('season-status').textContent.includes('dibuka'),true);
  assert.equal(d.get('season-packages').children.length,1);
+});
+
+test('failed season discovery leaves record panels empty with a retry message',async()=>{
+ const f=staff('1449H',{failCatalogue:true});await settle();
+ assert.equal(f.calls.some(p=>p.action==='tahlilPaymentQueue'||p.action==='tahlilReceiptHistory'),false);
+ assert.equal(f.get('payment-queue').children.length,0);assert.equal(f.get('season-status').textContent.length>0,true);
+});
+test('season switch clears and disables stale payment forms even when fetch fails',async()=>{
+ const f=staff('1448H',{queueItems:[{name:'Peserta QA',reference:'THL-111111111111',package:'Pakej QA',proof:'https://drive.google.com/file/d/mock/view'}],failQueueOn:'1449H'});
+ await settle();const old=f.get('payment-queue').children[0];assert.equal(typeof old.events.submit,'function');
+ old.children[3].children[0].valueAsNumber=50;
+ f.get('season-view').value='1449H';const change=f.get('season-view').events.change();
+ assert.equal(f.get('payment-queue').children.length,0);await change;await settle();
+ await old.events.submit({preventDefault(){}});assert.equal(f.calls.some(p=>p.action==='tahlilApprovePayment'),false);
+});
+test('after activation a dashboard following the active season refreshes its panels',async()=>{
+ const f=staff('1448H',{activeAfterSave:'1449H'});await settle();f.get('season-edit').value='1449H';f.get('season-edit').events.change();
+ f.get('season-active').checked=true;await f.get('season-form').events.submit({preventDefault(){}});await settle();
+ const queues=f.calls.filter(p=>p.action==='tahlilPaymentQueue');assert.equal(queues[queues.length-1].seasonId,'1449H');
+ const p=f.calls.find(p=>p.action==='tahlilSeasonSave');assert.equal(p.expectedActiveId,'1448H');assert.equal(p.expectedActiveVersion,1);
 });

@@ -6,3 +6,10 @@ Task 1: complete in JavaScript mock runtime; parser, schedule boundaries, legacy
 Task 2: complete in JavaScript mock runtime; 24 backend regression cases PASS, including sender-bound idempotency, uncertain append, per-season receipts and quotas. Native Node CI pending.
 Task 3: complete in JavaScript DOM fixtures; 7 registration/dashboard/public behavior cases PASS. Browser QA pending.
 Task 4: in progress; no production Apps Script source, metadata, records or deployment changed yet.
+
+Final review: independent read-only reviewer reviewed a94428f; no Critical, eight Important issue groups and one Minor. Merge held while fixing.
+Ruling: upgraded whole-sheet write concern from Minor to Important because re-writing an escaped literal beginning '=' can reinterpret it as a formula. Target only changed cells; cost if wrong: config corruption/formula interpretation.
+Ruling: release backend before frontend; remove unproven 1448H fallback on discovery errors. Cost: season controls remain unavailable during a failed rollout rather than showing a potentially wrong archive.
+Final: fixed sub-cent payments, competing activation, stale/default archive UI, lost-response recovery, AutoCrat W:X preflight, resumable package copy and hidden-poster CSS. Each behavioral issue reproduced RED, then GREEN; 32 backend and 10 frontend fixture tests PASS. CI full suite pending for fix commit.
+Final: fixed whole-sheet rewrite by writing metadata and affected rows only; literal formula regression RED→GREEN.
+Deferred minors: none. Actual AutoCrat configuration, shared-origin isolation and full live transaction QA remain explicit release limitations.

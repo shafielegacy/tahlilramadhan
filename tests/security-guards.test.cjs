@@ -38,7 +38,7 @@ test('payment amounts reject invalid values and support normal sen amounts', () 
   for (const value of [0.01, 0.29, 0.57, 50, 50.01, 100000]) {
     assert.equal(validPaymentAmount(value), true, String(value));
   }
-  for (const value of [0, -1, NaN, Infinity, -Infinity, 12.345, 100000.001, 100001]) {
+  for (const value of [0, -1, NaN, Infinity, -Infinity, 12.345, 1e-10, 0.009999999999, 50.000000000001, 100000.001, 100001]) {
     assert.equal(validPaymentAmount(value), false, String(value));
   }
 });

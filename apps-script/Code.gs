@@ -172,15 +172,32 @@ function tahlilWindow_(season, now) {
 function tahlilPackages_(ss,id) {
   const sheet=ss.getSheetByName('PAKEJ');
   if(!sheet)throw Error('Package configuration unavailable');
+  const ids=new Set();
   return sheet.getDataRange().getValues().slice(1)
     .filter(r=>r[0]===id&&r[5]==='YA')
     .map(r=>{
       const price=r[3], limit=r[4]===''||r[4]===undefined?0:Number(r[4]);
-      if(typeof r[1]!=='string'||!r[1]||r[1].length>40||typeof r[2]!=='string'||r[2].length>160||
-        typeof price!=='number'||!Number.isFinite(price)||price<=0||price>100000||
+      if(typeof r[1]!=='string'||!/^[A-Za-z0-9][A-Za-z0-9_-]{0,39}$/.test(r[1])||ids.has(r[1])||typeof r[2]!=='string'||r[2].length>160||
+        typeof price!=='number'||!Number.isFinite(price)||price<0.01||price>100000||price!==Math.round(price*100)/100||
         !Number.isSafeInteger(limit)||limit<0||limit>1000)throw Error('Invalid package');
+      ids.add(r[1]);
       return {id:r[1],name:r[2],price,limit};
     });
+}
+function tahlilEnsureRegistrationKeys_(sheet){
+  if(!sheet)return false;
+  const rows=sheet.getDataRange().getValues(), header=rows[0]||[];
+  const names=['KUNCI_PENDAFTARAN','EMAIL_PENGHANTAR'];
+  for(let i=0;i<2;i++){
+    if(header[22+i]&&header[22+i]!==names[i])return false;
+    if(!header[22+i]&&rows.slice(1).some(r=>r[22+i]))return false;
+  }
+  if(!header[22]||!header[23]){
+    const maximum=sheet.getMaxColumns();
+    if(maximum<24)sheet.insertColumnsAfter(maximum,24-maximum);
+    sheet.getRange(1,23,1,2).setValues([names]);
+  }
+  return true;
 }
 function tahlilSeasons_(request) {
   const actor=tahlilRequireSession_(request.session,'urusetia');
@@ -203,32 +220,47 @@ function tahlilSeasons_(request) {
     if(!tahlilRequireSession_(request.session,'urusetia'))return tahlilAuthResponse_('denied');
     const policy=tahlilReadSeasons_(ss), current=policy.items.find(s=>s.id===id);
     if(create?!!current||request.version!==0:!current||current.version!==request.version)return tahlilAuthResponse_('conflict');
+    const active=!create&&request.activate;
+    if(current&&current.active&&!active)return tahlilAuthResponse_('invalid');
+    if(active&&((policy.active?policy.active.id:null)!==request.expectedActiveId||
+      (policy.active?policy.active.version:null)!==request.expectedActiveVersion))return tahlilAuthResponse_('conflict');
     const packages=create?tahlilPackages_(ss,request.copyFrom):[];
     if(create&&(!policy.items.some(s=>s.id===request.copyFrom)||!packages.length))return tahlilAuthResponse_('invalid');
     if(!create&&request.enabled&&!tahlilPackages_(ss,id).length)return tahlilAuthResponse_('invalid');
     const sheet=ss.getSheetByName('MUSIM'), rows=sheet.getDataRange().getValues();
-    const padded=rows.map((r,i)=>i===0?TAHLIL_SEASON_HEADERS_.slice():Array.from({length:10},(_,j)=>r[j]??''));
-    if(policy.legacy)for(let i=1;i<padded.length;i++){
-      padded[i][5]=padded[i][0]==='1448H'?'YA':'TIDAK';padded[i][6]=0;padded[i][9]=padded[i][0]==='1448H'?'YA':'TIDAK';
+    if(create){
+      if(!tahlilEnsureRegistrationKeys_(ss.getSheetByName('DAFTAR')))return tahlilAuthResponse_('schema_conflict');
+      const target=ss.getSheetByName('PAKEJ');
+      const existing=target.getDataRange().getValues().slice(1).filter(r=>r[0]===id);
+      const snapshot=r=>JSON.stringify([r[1],r[2],r[3],Number(r[4])||0,r[5]]);
+      const expected=packages.map(p=>JSON.stringify([p.id,p.name,p.price,p.limit,'YA'])).sort();
+      if(existing.length){
+        const actual=existing.map(snapshot).sort();
+        if(JSON.stringify(actual)!==JSON.stringify(expected))return tahlilAuthResponse_('conflict');
+      }else target.getRange(target.getLastRow()+1,1,packages.length,6)
+        .setValues(packages.map(p=>[id,p.id,"'"+p.name,p.price,p.limit||'','YA']));
     }
-    const active=!create&&request.activate;
-    if(active)for(let i=1;i<padded.length;i++)if(padded[i][0]!==id&&padded[i][5]==='YA'){
-      padded[i][5]='TIDAK';padded[i][6]=Number(padded[i][6]||0)+1;
+    if(policy.legacy){
+      // Only the newly introduced metadata columns are migrated in one range.
+      const values=[TAHLIL_SEASON_HEADERS_.slice(3),...rows.slice(1).map(r=>[
+        '','',r[0]==='1448H'?'YA':'TIDAK',0,'','',r[0]==='1448H'?'YA':'TIDAK'
+      ])];
+      sheet.getRange(1,4,values.length,7).setValues(values);
+    }
+    const stamp=new Date().toISOString();
+    if(active&&policy.active&&policy.active.id!==id){
+      const previous=rows.findIndex((r,i)=>i>0&&r[0]===policy.active.id);
+      sheet.getRange(previous+1,6,1,4).setValues([['TIDAK',policy.active.version+1,stamp,actor]]);
     }
     const row=[id,"'"+name.trim(),!create&&request.enabled?'DIBUKA':'DITUTUP',
       request.opensAt+':00+08:00',request.closesAt+':00+08:00',active?'YA':'TIDAK',
-      (current?current.version:0)+1,new Date().toISOString(),actor,!create&&request.receiptReady?'YA':'TIDAK'];
-    const index=padded.findIndex((r,i)=>i>0&&r[0]===id);
-    if(create){
-      const target=ss.getSheetByName('PAKEJ');
-      const orphans=target.getDataRange().getValues().slice(1).some(r=>r[0]===id);
-      if(orphans)return tahlilAuthResponse_('conflict');
-      target.getRange(target.getLastRow()+1,1,packages.length,6)
-        .setValues(packages.map(p=>[id,p.id,"'"+p.name,p.price,p.limit||'','YA']));
-      padded.push(row);
-    }else padded[index]=row;
-    sheet.getRange(1,1,padded.length,10).setValues(padded);SpreadsheetApp.flush();
-    return tahlilRegistrationJson_({status:'ok',id,version:row[6]});
+      (current?current.version:0)+1,stamp,actor,!create&&request.receiptReady?'YA':'TIDAK'];
+    if(create)sheet.appendRow(row);
+    else{
+      const index=rows.findIndex((r,i)=>i>0&&r[0]===id);
+      sheet.getRange(index+1,1,1,10).setValues([row]);
+    }
+    SpreadsheetApp.flush();return tahlilRegistrationJson_({status:'ok',id,version:row[6]});
   }finally{lock.releaseLock();}
 }
 function tahlilRegistration_(request) {
@@ -261,18 +293,19 @@ function tahlilRegistration_(request) {
   try{
     lock.waitLock(15000);
     if(!tahlilRequireSession_(request.session,assisted?'urusetia':'peserta'))return tahlilAuthResponse_('login_required');
-    const policy=tahlilReadSeasons_(ss), season=policy.active;
-    const requestedId=request.seasonId||(season&&season.legacy?'1448H':'');
-    if(!season||requestedId!==season.id||(!season.legacy&&request.seasonVersion!==season.version))return tahlilAuthResponse_('season_changed');
+    const requestedId=request.seasonId===undefined?'1448H':request.seasonId;
+    if(typeof requestedId!=='string'||!/^\d{4}H$/.test(requestedId))return tahlilAuthResponse_('season_changed');
     const sheet=ss.getSheetByName('DAFTAR');if(!sheet)throw Error('Missing registration sheet');
     const rows=sheet.getDataRange().getValues();
-    const prior=rows.slice(1).find(r=>r[2]===season.id&&r[22]===key);
+    const prior=rows.slice(1).find(r=>r[2]===requestedId&&r[22]===key);
     if(prior)return prior[23]===actor?tahlilRegistrationJson_({status:'ok',reference:prior[1]}):tahlilAuthResponse_('conflict');
     const short='THL-'+key.replace(/-/g,'').slice(0,12).toUpperCase();
-    const old='THL-'+season.id+'-'+key.toUpperCase();
-    const legacy=rows.slice(1).find(r=>r[2]===season.id&&!r[22]&&[short,old].includes(r[1]));
+    const old='THL-'+requestedId+'-'+key.toUpperCase();
+    const legacy=rows.slice(1).find(r=>r[2]===requestedId&&!r[22]&&[short,old].includes(r[1]));
     if(legacy)return !assisted&&String(legacy[7]).toLowerCase()===actor&&legacy[12]==='PESERTA'
       ?tahlilRegistrationJson_({status:'ok',reference:legacy[1]}):tahlilAuthResponse_('conflict');
+    const policy=tahlilReadSeasons_(ss), season=policy.active;
+    if(!season||requestedId!==season.id||(!season.legacy&&request.seasonVersion!==season.version))return tahlilAuthResponse_('season_changed');
     if(!tahlilWindow_(season,Date.now()).open)return tahlilAuthResponse_('closed');
     const selected=tahlilPackages_(ss,season.id).find(p=>p.id===request.packageId);
     if(!selected||(selected.limit&&names.length>selected.limit))return tahlilAuthResponse_('invalid');
@@ -319,7 +352,7 @@ function tahlilPayment_(request){
   }
   const amount=request.amount,cents=typeof amount==='number'?Math.round(amount*100):NaN;
   if(typeof request.reference!=='string'||!/^THL-(?:\d{4}H-[0-9A-F-]{36}|[0-9A-F]{12})$/.test(request.reference)||
-    !Number.isFinite(amount)||amount<=0||amount>100000||!Number.isSafeInteger(cents)||Math.abs(amount*100-cents)>1e-7)return tahlilAuthResponse_('invalid');
+    !Number.isFinite(amount)||amount>100000||!Number.isSafeInteger(cents)||cents<1||amount!==cents/100)return tahlilAuthResponse_('invalid');
   const lock=LockService.getScriptLock();lock.waitLock(15000);
   try{
     if(!tahlilRequireSession_(request.session,'urusetia'))return tahlilAuthResponse_('denied');

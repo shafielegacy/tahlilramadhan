@@ -21,8 +21,8 @@ function fixture() {
   const member = 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb'.repeat(2);
   const props = {TAHLIL_ADMIN_EMAILS:'staff@example.test', TAHLIL_GOOGLE_CLIENT_ID:'test', TAHLIL_GOOGLE_CLIENT_SECRET:'test'};
   const cache = new Map([['tahlil-urusetia:'+admin,'staff@example.test'],['tahlil-peserta:'+member,'member@example.test']]);
-  const effects = {files:0, trashed:0, writes:0, oauth:0};
-  let afterLock, flushError = false, sequence = 1, held = false;
+  const effects = {files:0, trashed:0, writes:0, oauth:0, formulas:0};
+  let afterLock, flushError = false, failSeasonWrite=false, sequence = 1, held = false;
   const plain = x => typeof x === 'string' && x.startsWith("'") ? x.slice(1) : x;
   function sheet(name) {
     return {
@@ -35,14 +35,16 @@ function fixture() {
       getRange: (row,col,nr=1,nc=1) => typeof row === 'string' ? {createTextFinder:text=>({matchEntireCell(){return this;},findNext:()=>data[name].some(r=>r[1]===text)?{}:null})} : ({
         getValues: () => Array.from({length:nr},(_,i)=>Array.from({length:nc},(_,j)=>data[name][row-1+i]?.[col-1+j]??'')),
         setValues: values => {
+          if(name==='MUSIM'&&failSeasonWrite){failSeasonWrite=false;throw Error('MUSIM write failed');}
           effects.writes++;
           values.forEach((r,i)=>r.forEach((v,j)=>{
             if(!data[name][row-1+i]) data[name][row-1+i]=[];
+            if(typeof v==='string'&&v.startsWith('='))effects.formulas++;
             data[name][row-1+i][col-1+j]=plain(v);
           }));
         }
       }),
-      appendRow: row => {effects.writes++;data[name].push(row.map(plain));}
+      appendRow: row => {if(name==='MUSIM'&&failSeasonWrite){failSeasonWrite=false;throw Error('MUSIM write failed');}effects.writes++;data[name].push(row.map(plain));}
     };
   }
   const ss = {getSheetByName:name=>data[name]?sheet(name):null};
@@ -76,7 +78,7 @@ function fixture() {
     key:'12345678-1234-4123-8123-123456789abc',mime:'application/pdf',file:'JVBERi0xLjQ=',...extra});
   const row = (id,season='1448H',email='member@example.test') => [new Date(now),id,season,'RM50','PAKEJ RM50',50,'Peserta QA',email,'0191234567','Nama QA','https://drive.google.com/file/d/mock/view','MENUNGGU SEMAKAN','PESERTA','','','','','','','','','','',''];
   return {context,call,register,data,admin,member,props,cache,effects,row,
-    clock:value=>{now=Date.parse(value);}, afterLock:fn=>{afterLock=fn;},flushError:()=>{flushError=true;}};
+    clock:value=>{now=Date.parse(value);}, afterLock:fn=>{afterLock=fn;},flushError:()=>{flushError=true;},failSeasonWrite:()=>{failSeasonWrite=true;}};
 }
 
 test('MYT parser rejects impossible dates and keeps explicit UTC offset',()=>{
@@ -109,7 +111,7 @@ test('all season admin routes deny missing, participant and removed allowlist se
 });
 test('save dates checks expected revision and leaves receipt rows unchanged',()=>{
   const f=fixture();f.data.DAFTAR.push(f.row('THL-111111111111'));const before=JSON.stringify(f.data.DAFTAR);
-  const p={action:'tahlilSeasonSave',session:f.admin,id:'1448H',name:'Ramadan 1448H',opensAt:'2026-11-21T11:00',closesAt:'2026-11-21T13:00',enabled:true,activate:true,receiptReady:true,version:1};
+  const p={action:'tahlilSeasonSave',session:f.admin,id:'1448H',name:'Ramadan 1448H',opensAt:'2026-11-21T11:00',closesAt:'2026-11-21T13:00',enabled:true,activate:true,receiptReady:true,version:1,expectedActiveId:'1448H',expectedActiveVersion:1};
   assert.equal(f.call({...p,version:0}).status,'conflict');assert.equal(f.effects.writes,0);
   assert.equal(f.call(p).status,'ok');assert.equal(f.data.MUSIM[1][6],2);assert.equal(JSON.stringify(f.data.DAFTAR),before);
 });
@@ -206,4 +208,56 @@ test('creating a future season preserves the legacy 1448H opening status',()=>{
 test('case-only changes in the idempotency UUID cannot duplicate registration',()=>{
  const f=fixture();const a=f.register();assert.equal(f.register({key:'12345678-1234-4123-8123-123456789ABC'}).reference,a.reference);
  assert.equal(f.effects.files,1);
+});
+
+test('sub-cent and rounded amounts cannot mark a zero or altered payment paid',()=>{
+ const f=fixture();f.data.DAFTAR.push(f.row('THL-111111111111'));
+ for(const amount of [1e-10,0.009999999999,50.000000000001])
+  assert.equal(f.call({action:'tahlilApprovePayment',session:f.admin,seasonId:'1448H',reference:'THL-111111111111',amount}).status,'invalid');
+ assert.equal(f.effects.writes,0);
+});
+test('two administrators cannot overwrite another active-season switch',()=>{
+ const f=fixture();f.data.MUSIM.push(['1450H','Ramadan 1450H','DITUTUP','2028-01-01T00:00:00+08:00','2028-02-01T00:00:00+08:00','TIDAK',1,'','','TIDAK']);
+ const p={action:'tahlilSeasonSave',session:f.admin,id:'1449H',name:'Ramadan 1449H',opensAt:'2027-11-21T11:00',closesAt:'2027-11-21T13:00',enabled:false,activate:true,receiptReady:false,version:1,expectedActiveId:'1448H',expectedActiveVersion:1};
+ assert.equal(f.call(p).status,'ok');const writes=f.effects.writes;
+ assert.equal(f.call({...p,id:'1450H',name:'Ramadan 1450H'}).status,'conflict');assert.equal(f.effects.writes,writes);
+ assert.equal(f.data.MUSIM.filter(r=>r[5]==='YA')[0][0],'1449H');
+});
+test('closing registration keeps the active season and cannot unset it',()=>{
+ const f=fixture();const p={action:'tahlilSeasonSave',session:f.admin,id:'1448H',name:'Ramadan 1448H',opensAt:'2026-11-21T11:00',closesAt:'2026-11-21T13:00',enabled:false,activate:false,receiptReady:true,version:1,expectedActiveId:'1448H',expectedActiveVersion:1};
+ assert.equal(f.call(p).status,'invalid');assert.equal(f.effects.writes,0);
+ assert.equal(f.call({...p,activate:true}).status,'ok');assert.equal(f.call({action:'tahlilPackages'}).open,false);
+});
+test('lost response retry recovers owned result after revision change or active switch',()=>{
+ const f=fixture();const a=f.register();f.data.MUSIM[1][2]='DITUTUP';f.data.MUSIM[1][6]=2;
+ assert.equal(f.register().reference,a.reference);
+ f.data.MUSIM[1][5]='TIDAK';f.data.MUSIM[2][5]='YA';assert.equal(f.register().reference,a.reference);
+ f.cache.set('tahlil-peserta:'+f.member,'other@example.test');assert.notEqual(f.register().status,'ok');assert.equal(f.effects.files,1);
+});
+test('season creation reserves W:X before any future AutoCrat job',()=>{
+ const f=fixture();f.data.DAFTAR[0]=f.data.DAFTAR[0].slice(0,22);
+ const p={action:'tahlilSeasonSave',session:f.admin,create:true,copyFrom:'1448H',id:'1450H',name:'Ramadan 1450H',opensAt:'2028-01-01T00:00',closesAt:'2028-02-01T00:00',version:0,enabled:false,activate:false,receiptReady:false};
+ assert.equal(f.call(p).status,'ok');assert.equal(f.data.DAFTAR[0][22],'KUNCI_PENDAFTARAN');assert.equal(f.data.DAFTAR[0][23],'EMAIL_PENGHANTAR');
+ const g=fixture();g.data.DAFTAR[0][22]='Merged Doc ID - Other Job';
+ assert.equal(g.call(p).status,'schema_conflict');assert.equal(g.effects.writes,0);
+});
+test('season creation resumes a matching package copy after MUSIM write fails',()=>{
+ const f=fixture();const p={action:'tahlilSeasonSave',session:f.admin,create:true,copyFrom:'1448H',id:'1450H',name:'Ramadan 1450H',opensAt:'2028-01-01T00:00',closesAt:'2028-02-01T00:00',version:0,enabled:false,activate:false,receiptReady:false};
+ f.failSeasonWrite();assert.equal(f.call(p).status,'error');assert.equal(f.data.PAKEJ.filter(r=>r[0]==='1450H').length,1);
+ assert.equal(f.call(p).status,'ok');assert.equal(f.data.PAKEJ.filter(r=>r[0]==='1450H').length,1);
+});
+test('saving one season never reinterprets another season literal as a formula',()=>{
+ const f=fixture();f.data.MUSIM[2][1]='=2+2';
+ const p={action:'tahlilSeasonSave',session:f.admin,id:'1448H',name:'Ramadan 1448H',opensAt:'2026-11-21T11:00',closesAt:'2026-11-21T13:00',enabled:true,activate:true,receiptReady:true,version:1,expectedActiveId:'1448H',expectedActiveVersion:1};
+ assert.equal(f.call(p).status,'ok');assert.equal(f.effects.formulas,0);assert.equal(f.data.MUSIM[2][1],'=2+2');
+});
+
+test('package IDs, duplicates and non-sen prices fail closed',()=>{
+ for(const kind of ['formula','duplicate','subcent']){
+  const f=fixture();
+  if(kind==='formula')f.data.PAKEJ[1][1]='=IMPORTDATA("bad")';
+  if(kind==='duplicate')f.data.PAKEJ.push(['1448H','RM50','Other quote',70,'','YA']);
+  if(kind==='subcent')f.data.PAKEJ[1][3]=50.001;
+  assert.notEqual(f.call({action:'tahlilPackages'}).status,'ok');
+ }
 });

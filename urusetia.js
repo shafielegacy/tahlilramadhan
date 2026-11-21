@@ -25,6 +25,9 @@
 
 
   let selectedSeasonId = '';
+  let activeSeasonId = '';
+  let followActiveSeason = true;
+  let seasonDiscoveryReady = false;
   let seasonRecords = [];
   let creatingSeason = false;
   let seasonSavePending = false;
@@ -56,33 +59,47 @@
       : 'Paparan rekod: ' + selectedSeasonId;
   }
   async function loadSeasonSettings() {
-    if (!seasonView || !seasonEdit) return;
+    if (!seasonView || !seasonEdit) return false;
+    seasonDiscoveryReady = false;
     try {
       const result = await request('tahlilSeasonList', {session:sessionStorage.getItem(storageKey)});
       if (result.status !== 'ok' || !Array.isArray(result.items) || !result.items.length) throw Error('Unavailable');
       seasonRecords = result.items;
-      if (!seasonRecords.some(s => s.id === selectedSeasonId)) selectedSeasonId = result.activeId || result.items[0].id;
+      activeSeasonId = result.activeId || '';
+      if (followActiveSeason || !seasonRecords.some(s => s.id === selectedSeasonId)) selectedSeasonId = activeSeasonId;
       seasonView.replaceChildren(...seasonRecords.map(s => new Option(s.name + (s.active ? ' · Aktif' : ' · Arkib'),s.id)));
       seasonEdit.replaceChildren(...seasonRecords.map(s => new Option(s.name,s.id)));
       seasonView.value = selectedSeasonId;
-      seasonEdit.value = result.activeId || selectedSeasonId;
+      seasonEdit.value = activeSeasonId || result.items[0].id;
       seasonField('season-view-wrap').hidden = false;
       seasonField('season-form').hidden = false;
       seasonField('season-new').disabled = false;
       seasonField('season-save').disabled = false;
+      seasonDiscoveryReady = true;
+      seasonView.disabled = false;
       fillSeasonForm(); updateSeasonLabel();
+      return true;
     } catch {
-      if (!selectedSeasonId) selectedSeasonId = '1448H';
+      seasonField('season-view-wrap').hidden = false;
+      seasonView.disabled = true;
+      seasonField('payment-queue').replaceChildren();
+      seasonField('history-results').replaceChildren();
+      seasonField('season-view-label').textContent = 'Sesi belum dapat disahkan. Tekan Muat Semula Sesi untuk cuba lagi.';
       seasonField('season-form').hidden = true;
       seasonField('season-new').disabled = true;
       seasonFeedback.textContent = 'Tetapan sesi belum dapat dimuatkan. Cuba muat semula halaman.';
+      return false;
     }
   }
   seasonView?.addEventListener('change', async () => {
     if (!seasonRecords.some(s => s.id === seasonView.value)) return;
     selectedSeasonId = seasonView.value;
+    followActiveSeason = selectedSeasonId === activeSeasonId;
     updateSeasonLabel();
     await Promise.all([loadPaymentQueue(),loadReceiptHistory(0,'')]);
+  });
+  seasonField('season-retry')?.addEventListener('click', async () => {
+    if (await loadSeasonSettings()) await Promise.all([loadPaymentQueue(),loadReceiptHistory(0,'')]);
   });
   seasonEdit?.addEventListener('change', fillSeasonForm);
   seasonField('season-new')?.addEventListener('click', () => {
@@ -115,7 +132,8 @@
       name:seasonField('season-name').value.trim(),
       opensAt:seasonField('season-opens').value, closesAt:seasonField('season-closes').value,
       enabled:seasonField('season-enabled').checked, activate:seasonField('season-active').checked,
-      receiptReady:seasonField('season-receipt').checked, version:creatingSeason ? 0 : current?.version
+      receiptReady:seasonField('season-receipt').checked, version:creatingSeason ? 0 : current?.version,
+      expectedActiveId:activeSeasonId || null, expectedActiveVersion:seasonRecords.find(s => s.id === activeSeasonId)?.version ?? null
     };
     if (!/^\d{4}H$/.test(payload.id) || !payload.name || !payload.opensAt || !payload.closesAt || payload.opensAt >= payload.closesAt) {
       seasonFeedback.textContent = 'Semak ID sesi, nama dan tarikh. Masa tutup mesti selepas masa buka.'; return;
@@ -133,8 +151,11 @@
       if (result.status === 'conflict') {
         seasonFeedback.textContent = 'Tetapan sudah berubah atau ID sesi telah digunakan. Muat semula halaman sebelum menyimpan lagi.'; return;
       }
+      if (result.status === 'schema_conflict') {
+        seasonFeedback.textContent = 'Kolum rekod bertembung dengan tetapan lain. Hubungi pemilik sistem untuk semakan sebelum menyediakan job resit.'; return;
+      }
       if (result.status !== 'ok') throw Error('Save failed');
-      await loadSeasonSettings();
+      if (await loadSeasonSettings()) await Promise.all([loadPaymentQueue(),loadReceiptHistory(0,'')]);
       seasonFeedback.textContent = 'Tetapan sesi disimpan. Semak sesi aktif dan status pendaftaran sebelum berkongsi pautan.';
     } catch { seasonFeedback.textContent = 'Tetapan belum dapat disahkan. Muat semula halaman untuk semak hasil sebelum cuba lagi.'; }
     finally { seasonSavePending = false; button.disabled = false; }
@@ -147,7 +168,7 @@
     document.getElementById('login-actions').style.display = 'none';
     document.getElementById('dashboard').hidden = false;
     status.textContent = 'Akses urusetia disahkan.';
-    await loadSeasonSettings();
+    if (!await loadSeasonSettings()) return;
     loadPaymentQueue();
     loadReceiptHistory();
   }
@@ -160,6 +181,8 @@
     const queue = document.getElementById('payment-queue');
     const feedback = document.getElementById('payment-status');
     if (!queue || !feedback) return;
+    queue.replaceChildren();
+    if (!seasonDiscoveryReady || !seasonId) { feedback.textContent = 'Pilih sesi yang sah untuk memuatkan rekod.'; return; }
     const session = sessionStorage.getItem(storageKey);
     feedback.textContent = 'Memuatkan bayaran…';
     try {
@@ -224,8 +247,9 @@
   }
 
   function validPaymentAmount(value) {
-    return Number.isFinite(value) && value > 0 && value <= 100000 &&
-      Math.abs(Math.round(value * 100) - value * 100) < 1e-7;
+    const cents = Math.round(value * 100);
+    return Number.isFinite(value) && value <= 100000 && Number.isSafeInteger(cents) &&
+      cents >= 1 && value === cents / 100;
   }
 
   function paymentForm(item, session, feedback, seasonId) {
@@ -262,6 +286,7 @@
     form.append(proof, label, button);
     form.addEventListener('submit', async event => {
       event.preventDefault();
+      if (!seasonDiscoveryReady || seasonId !== selectedSeasonId) { feedback.textContent = 'Sesi paparan telah berubah. Semak senarai bayaran semasa.'; return; }
       const approvedAmount = amount.valueAsNumber;
       if (!validPaymentAmount(approvedAmount)) {
         feedback.textContent = 'Amaun tidak sah. Masukkan nilai RM0.01 hingga RM100,000.00 dengan dua tempat perpuluhan.';
@@ -269,6 +294,7 @@
         return;
       }
       if (!await confirmPayment('Sahkan bayaran RM' + approvedAmount.toFixed(2) + ' untuk ' + item.name + ' (sesi ' + seasonId + ')?')) return;
+      if (!seasonDiscoveryReady || seasonId !== selectedSeasonId) { feedback.textContent = 'Sesi paparan telah berubah. Semak semula bayaran.'; return; }
       button.disabled = true;
       showPaymentDialog('Sedang mengesahkan bayaran…', 'Menyimpan pengesahan dan menyediakan nombor resit…', 'loading');
       try {
@@ -319,6 +345,7 @@
     historyResults.replaceChildren();
     historyPrevious.hidden = true;
     historyNext.hidden = true;
+    if (!seasonDiscoveryReady || !selectedSeasonId) { historyStatus.textContent = 'Pilih sesi yang sah untuk memuatkan rekod.'; return; }
     try {
       const result = await request('tahlilReceiptHistory', {
         session: sessionStorage.getItem(storageKey), seasonId: selectedSeasonId, offset, query
