@@ -1,0 +1,58 @@
+/* Tahlil Ramadan 1448H — animated split-panel authentication, frontend only. */
+.auth-page{min-height:100vh;background:radial-gradient(circle at 14% 12%,#426957 0,transparent 36%),radial-gradient(circle at 85% 95%,#274b3b 0,transparent 45%),#0f2823}
+.auth-main{width:min(100% - 2rem,70rem);max-width:none;margin:0 auto;padding:clamp(1rem,3vw,2.4rem) 0 3rem}
+.auth-main .home-link{margin-bottom:1.2rem}
+.auth-shell{display:grid;grid-template-columns:48% 52%;min-height:540px;overflow:hidden;isolation:isolate;position:relative;border:1px solid #f8d99355;border-radius:2rem;background:#fff9ed;box-shadow:0 32px 80px #031b1675,0 0 0 6px #ffffff0a}
+.auth-showcase{position:relative;display:flex;flex-direction:column;align-items:flex-start;justify-content:space-between;gap:2rem;min-width:0;padding:clamp(2rem,5vw,3.5rem);overflow:hidden;color:#fff6da;background:radial-gradient(circle at 77% 21%,#67927b66,transparent 42%),linear-gradient(152deg,#173e34,#0b2724 76%);animation:auth-slide-from-left .75s cubic-bezier(.2,.75,.2,1) both}
+.auth-showcase::before{content:"";position:absolute;inset:0;opacity:.35;pointer-events:none;background-image:repeating-linear-gradient(45deg,transparent 0 24px,#ffe6a418 25px 26px,transparent 27px 49px),repeating-linear-gradient(-45deg,transparent 0 24px,#ffe6a40c 25px 26px,transparent 27px 49px)}
+.auth-showcase::after{content:"";position:absolute;width:17rem;height:17rem;border:1px solid #ffda9255;border-radius:50%;right:-6rem;bottom:-9rem;box-shadow:0 0 0 2.5rem #f6c7760b,0 0 0 5rem #f6c77609;pointer-events:none}
+.auth-showcase > *{position:relative;z-index:1}
+.auth-eyebrow{font-size:.73rem;letter-spacing:.18em;text-transform:uppercase;font-weight:800;color:#f5d48e}
+.auth-motif{align-self:center;width:min(85%,17rem);aspect-ratio:1;position:relative;margin:auto 0;display:grid;place-items:center}
+.auth-motif::before{content:"";position:absolute;inset:4%;border:2px solid #dbb672;border-radius:50%;box-shadow:0 0 0 12px #ebcd8b16,0 0 0 28px #ebcd8b0b;animation:auth-orbit 19s linear infinite}
+.auth-motif::after{content:"✦";position:absolute;top:3%;right:9%;color:#ffe2a3;font-size:2.7rem}
+.auth-mosque{font-size:clamp(5rem,11vw,8rem);line-height:1;filter:drop-shadow(0 14px 20px #0006);animation:auth-float 5s ease-in-out infinite}
+.auth-showcase h2{font:500 clamp(2.2rem,4.2vw,3.8rem)/1.08 Georgia,serif;letter-spacing:-.035em;color:#fff5d9}
+.auth-showcase p{max-width:27rem;color:#d9e6d9;font-size:.96rem}
+.auth-showcase .auth-accent{color:#f7ca78}
+.auth-content{display:flex;flex-direction:column;justify-content:center;min-width:0;padding:clamp(1.5rem,5vw,3.5rem);color:#173e34;animation:auth-slide-from-right .75s cubic-bezier(.2,.75,.2,1) both}
+.auth-content h1{font-size:clamp(2rem,4.5vw,3.4rem);letter-spacing:-.04em;color:#173e34;margin:.7rem 0 0}
+.auth-content p{color:#476357}
+.auth-content .auth-description{margin:.9rem 0 1.5rem;font-size:1rem;max-width:33rem}
+.auth-content #status{margin:0 0 1rem;min-height:1.4rem;color:#466251;font-size:.94rem}
+.auth-content .button{width:fit-content;min-width:min(100%,17rem)}
+.auth-content .auth-google{width:100%;max-width:24rem;gap:.7rem;margin:.3rem 0 .8rem}
+.auth-google-mark{display:grid;place-items:center;width:1.65rem;height:1.65rem;flex:none;border-radius:.4rem;background:#fff;color:#4285f4;font-size:1.1rem;font-weight:900;box-shadow:inset 0 0 0 1px #dedede}
+.auth-hint{margin:1rem 0 0;font-size:.91rem;color:#547064}
+.auth-hint a{color:#176044;text-underline-offset:.2em;font-weight:750}
+.auth-hint a:focus-visible{outline:3px solid #1a6747;outline-offset:4px}
+.auth-content label{color:#194333;font-weight:650}
+.auth-content #daftar{width:100%;animation:auth-form-enter .45s ease both}
+.auth-content #daftar label{display:grid;gap:.35rem;margin:.9rem 0}
+.auth-content #daftar input,.auth-content #daftar select,.auth-content #daftar textarea{border:1px solid #a1bba5;background:#fffdf6;color:#123a2b;border-radius:.7rem}
+.auth-content #daftar input:focus-visible,.auth-content #daftar select:focus-visible,.auth-content #daftar textarea:focus-visible{outline:3px solid #e1b76e;outline-offset:1px}
+.auth-content #daftar button[type=submit]{margin-top:.8rem}
+.auth-shell:has(#daftar:not([hidden])){grid-template-columns:34% 66%}
+.auth-shell:has(#daftar:not([hidden])) .auth-motif{width:min(85%,11rem)}
+.auth-shell:has(#daftar:not([hidden])) .auth-mosque{font-size:5rem}
+.auth-shell.is-authenticated{display:block;min-height:0;max-width:70rem;border-color:#b5a27177;background:linear-gradient(135deg,#24483b,#183a30)}
+.auth-shell.is-authenticated .auth-showcase{display:none}
+.auth-shell.is-authenticated .auth-content{color:#fff4dc;animation:none}
+.auth-shell.is-authenticated .auth-content h1{color:#fff4dc}
+.auth-shell.is-authenticated .auth-content p{color:#c7d7ca}
+.auth-shell.is-authenticated .auth-hint{display:none}
+.auth-shell--staff .auth-showcase{order:2;animation-name:auth-slide-from-right}
+.auth-shell--staff .auth-content{order:1;animation-name:auth-slide-from-left}
+.auth-shell--staff .auth-content #login-actions{margin-top:.3rem}
+.auth-shell--staff .auth-content #login-actions .button{max-width:24rem;width:100%}
+.auth-shell--staff.is-authenticated .auth-content{padding:clamp(1.5rem,4vw,3rem)}
+.auth-shell--staff.is-authenticated .auth-content #status{color:#d9e3d6}
+.auth-shell--staff.is-authenticated .auth-content h1{font-size:clamp(2rem,5vw,3.3rem)}
+@keyframes auth-slide-from-left{from{opacity:.7;transform:translateX(-9%)}to{opacity:1;transform:translateX(0)}}
+@keyframes auth-slide-from-right{from{opacity:.7;transform:translateX(9%)}to{opacity:1;transform:translateX(0)}}
+@keyframes auth-float{0%,100%{transform:translateY(0)}50%{transform:translateY(-11px)}}
+@keyframes auth-orbit{to{transform:rotate(360deg)}}
+@keyframes auth-form-enter{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+@media(max-width:780px){.auth-shell,.auth-shell:has(#daftar:not([hidden])){grid-template-columns:1fr;min-height:0;border-radius:1.3rem}.auth-showcase,.auth-shell--staff .auth-showcase{order:0;min-height:190px;gap:.5rem;padding:1.5rem 1.7rem}.auth-content,.auth-shell--staff .auth-content{order:1;padding:1.6rem}.auth-motif{position:absolute;right:.6rem;top:1.5rem;width:7rem;opacity:.27}.auth-mosque,.auth-shell:has(#daftar:not([hidden])) .auth-mosque{font-size:4.2rem}.auth-showcase h2{font-size:2.1rem;max-width:19rem}.auth-showcase p{max-width:21rem;font-size:.85rem}.auth-main{width:min(100% - 1rem,70rem)}}
+@media(max-width:430px){.auth-showcase{min-height:180px}.auth-content{padding:1.3rem}.auth-content h1{font-size:2.1rem}.auth-content .button{width:100%;min-width:0}.auth-showcase h2{font-size:1.9rem}.auth-main .home-link{margin-left:.35rem}}
+@media(prefers-reduced-motion:reduce){.auth-showcase,.auth-content,.auth-motif::before,.auth-mosque,.auth-content #daftar{animation:none!important;transition:none!important}}
