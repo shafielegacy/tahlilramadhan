@@ -23,31 +23,154 @@
     return response.json();
   }
 
-  function showDashboard(email) {
+
+  let selectedSeasonId = '';
+  let seasonRecords = [];
+  let creatingSeason = false;
+  let seasonSavePending = false;
+  const seasonField = id => document.getElementById(id);
+  const seasonFeedback = seasonField('season-status');
+  const seasonView = seasonField('season-view');
+  const seasonEdit = seasonField('season-edit');
+  function fillSeasonForm() {
+    const item = seasonRecords.find(s => s.id === seasonEdit.value);
+    if (!item) return;
+    creatingSeason = false;
+    seasonField('season-id').value = item.id;
+    seasonField('season-id').disabled = true;
+    seasonField('season-name').value = item.name;
+    seasonField('season-opens').value = item.opensAt || '';
+    seasonField('season-closes').value = item.closesAt || '';
+    for (const [id, value] of [['season-enabled',item.enabled],['season-active',item.active],['season-receipt',item.receiptReady]]) {
+      seasonField(id).checked = value === true;
+      seasonField(id).disabled = false;
+    }
+    seasonFeedback.textContent = item.legacy
+      ? 'Tarikh belum ditetapkan. Pendaftaran sesi 1448H masih mengikut status sedia ada sehingga tetapan disimpan.'
+      : 'Sesi ' + item.id + ' · versi tetapan ' + item.version + '. Semua masa ialah waktu Malaysia.';
+  }
+  function updateSeasonLabel() {
+    const item = seasonRecords.find(s => s.id === selectedSeasonId);
+    seasonField('season-view-label').textContent = item
+      ? 'Paparan rekod: ' + item.name + (item.active ? ' · Sesi aktif' : ' · Arkib')
+      : 'Paparan rekod: ' + selectedSeasonId;
+  }
+  async function loadSeasonSettings() {
+    if (!seasonView || !seasonEdit) return;
+    try {
+      const result = await request('tahlilSeasonList', {session:sessionStorage.getItem(storageKey)});
+      if (result.status !== 'ok' || !Array.isArray(result.items) || !result.items.length) throw Error('Unavailable');
+      seasonRecords = result.items;
+      if (!seasonRecords.some(s => s.id === selectedSeasonId)) selectedSeasonId = result.activeId || result.items[0].id;
+      seasonView.replaceChildren(...seasonRecords.map(s => new Option(s.name + (s.active ? ' · Aktif' : ' · Arkib'),s.id)));
+      seasonEdit.replaceChildren(...seasonRecords.map(s => new Option(s.name,s.id)));
+      seasonView.value = selectedSeasonId;
+      seasonEdit.value = result.activeId || selectedSeasonId;
+      seasonField('season-view-wrap').hidden = false;
+      seasonField('season-form').hidden = false;
+      seasonField('season-new').disabled = false;
+      seasonField('season-save').disabled = false;
+      fillSeasonForm(); updateSeasonLabel();
+    } catch {
+      if (!selectedSeasonId) selectedSeasonId = '1448H';
+      seasonField('season-form').hidden = true;
+      seasonField('season-new').disabled = true;
+      seasonFeedback.textContent = 'Tetapan sesi belum dapat dimuatkan. Cuba muat semula halaman.';
+    }
+  }
+  seasonView?.addEventListener('change', async () => {
+    if (!seasonRecords.some(s => s.id === seasonView.value)) return;
+    selectedSeasonId = seasonView.value;
+    updateSeasonLabel();
+    await Promise.all([loadPaymentQueue(),loadReceiptHistory(0,'')]);
+  });
+  seasonEdit?.addEventListener('change', fillSeasonForm);
+  seasonField('season-new')?.addEventListener('click', () => {
+    creatingSeason = true;
+    seasonField('season-id').disabled = false;
+    for (const id of ['season-id','season-name','season-opens','season-closes']) seasonField(id).value = '';
+    for (const id of ['season-enabled','season-active','season-receipt']) {
+      seasonField(id).checked = false; seasonField(id).disabled = true;
+    }
+    seasonFeedback.textContent = 'Sesi baharu akan dicipta tertutup. Pakej disalin daripada ' + seasonEdit.value + '.';
+    seasonField('season-id').focus();
+  });
+  function confirmSeasonSave(message) {
+    const dialog = seasonField('season-confirm-dialog');
+    if (!dialog) return Promise.resolve(window.confirm(message));
+    seasonField('season-confirm-message').textContent = message;
+    dialog.returnValue = '';
+    return new Promise(resolve => {
+      dialog.addEventListener('close', () => resolve(dialog.returnValue === 'save'), {once:true});
+      dialog.showModal();
+    });
+  }
+  seasonField('season-form')?.addEventListener('submit', async event => {
+    event.preventDefault();
+    if (seasonSavePending) return;
+    const current = seasonRecords.find(s => s.id === seasonEdit.value);
+    const payload = {
+      session:sessionStorage.getItem(storageKey), create:creatingSeason,
+      copyFrom:seasonEdit.value, id:seasonField('season-id').value.trim(),
+      name:seasonField('season-name').value.trim(),
+      opensAt:seasonField('season-opens').value, closesAt:seasonField('season-closes').value,
+      enabled:seasonField('season-enabled').checked, activate:seasonField('season-active').checked,
+      receiptReady:seasonField('season-receipt').checked, version:creatingSeason ? 0 : current?.version
+    };
+    if (!/^\d{4}H$/.test(payload.id) || !payload.name || !payload.opensAt || !payload.closesAt || payload.opensAt >= payload.closesAt) {
+      seasonFeedback.textContent = 'Semak ID sesi, nama dan tarikh. Masa tutup mesti selepas masa buka.'; return;
+    }
+    const message = creatingSeason
+      ? 'Cipta ' + payload.name + ' dalam keadaan tertutup, dengan pakej daripada ' + payload.copyFrom + '?'
+      : 'Simpan tetapan ' + payload.name + '? ' + (payload.activate ? 'Sesi ini akan menjadi sesi aktif. ' : '') +
+        'Buka: ' + payload.opensAt.replace('T',' ') + ', tutup: ' + payload.closesAt.replace('T',' ') + ' (waktu Malaysia).';
+    seasonSavePending = true;
+    if (!await confirmSeasonSave(message)) { seasonSavePending = false; return; }
+    const button = seasonField('season-save'); button.disabled = true;
+    seasonFeedback.textContent = 'Menyimpan tetapan…';
+    try {
+      const result = await request('tahlilSeasonSave', payload);
+      if (result.status === 'conflict') {
+        seasonFeedback.textContent = 'Tetapan sudah berubah atau ID sesi telah digunakan. Muat semula halaman sebelum menyimpan lagi.'; return;
+      }
+      if (result.status !== 'ok') throw Error('Save failed');
+      await loadSeasonSettings();
+      seasonFeedback.textContent = 'Tetapan sesi disimpan. Semak sesi aktif dan status pendaftaran sebelum berkongsi pautan.';
+    } catch { seasonFeedback.textContent = 'Tetapan belum dapat disahkan. Muat semula halaman untuk semak hasil sebelum cuba lagi.'; }
+    finally { seasonSavePending = false; button.disabled = false; }
+  });
+
+  async function showDashboard(email) {
     document.querySelector('.auth-shell')?.classList.add('is-authenticated');
     document.getElementById('tajuk').textContent = 'Dashboard Urusetia';
     document.getElementById('intro').textContent = 'Log masuk sebagai ' + email;
     document.getElementById('login-actions').style.display = 'none';
     document.getElementById('dashboard').hidden = false;
     status.textContent = 'Akses urusetia disahkan.';
+    await loadSeasonSettings();
     loadPaymentQueue();
     loadReceiptHistory();
   }
 
 
+  let queueRequest = 0;
   async function loadPaymentQueue(message = '') {
+    const current = ++queueRequest;
+    const seasonId = selectedSeasonId;
     const queue = document.getElementById('payment-queue');
     const feedback = document.getElementById('payment-status');
     if (!queue || !feedback) return;
     const session = sessionStorage.getItem(storageKey);
     feedback.textContent = 'Memuatkan bayaran…';
     try {
-      const result = await request('tahlilPaymentQueue', { session });
+      const result = await request('tahlilPaymentQueue', { session, seasonId });
       if (result.status !== 'ok' || !Array.isArray(result.items)) throw new Error('Queue unavailable');
-      queue.replaceChildren(...result.items.map(item => paymentForm(item, session, feedback)));
+      if (current !== queueRequest) return;
+      queue.replaceChildren(...result.items.map(item => paymentForm(item, session, feedback, seasonId)));
       feedback.textContent = [message, result.items.length ? '' : 'Tiada bayaran menunggu semakan.']
         .filter(Boolean).join(' ');
     } catch {
+      if (current !== queueRequest) return;
       feedback.textContent = [message, 'Senarai bayaran tidak dapat dimuatkan. Muat semula halaman.']
         .filter(Boolean).join(' ');
     }
@@ -105,7 +228,7 @@
       Math.abs(Math.round(value * 100) - value * 100) < 1e-7;
   }
 
-  function paymentForm(item, session, feedback) {
+  function paymentForm(item, session, feedback, seasonId) {
     const form = document.createElement('form');
     const heading = document.createElement('h3');
     heading.textContent = item.name;
@@ -145,13 +268,18 @@
         amount.focus();
         return;
       }
-      if (!await confirmPayment('Sahkan bayaran RM' + approvedAmount.toFixed(2) + ' untuk ' + item.name + '?')) return;
+      if (!await confirmPayment('Sahkan bayaran RM' + approvedAmount.toFixed(2) + ' untuk ' + item.name + ' (sesi ' + seasonId + ')?')) return;
       button.disabled = true;
       showPaymentDialog('Sedang mengesahkan bayaran…', 'Menyimpan pengesahan dan menyediakan nombor resit…', 'loading');
       try {
         const result = await request('tahlilApprovePayment', {
-          session, reference: item.reference, amount: approvedAmount
+          session, seasonId, reference: item.reference, amount: approvedAmount
         });
+        if (result.status === 'receipt_setup_required') {
+          const message = 'Semak templat, job dan penapis musim AutoCrat; kemudian tandakan semakan resit dalam Tetapan Sesi.';
+          showPaymentDialog('Tetapan resit belum lengkap', message, 'result');
+          feedback.textContent = message; button.disabled = false; return;
+        }
         if (result.status !== 'ok' && result.status !== 'already_approved') throw new Error('Approval failed');
         const message = 'Resit ' + result.receipt + ' sedia untuk AutoCrat.';
         showPaymentDialog('Bayaran disahkan', message, 'result');
@@ -193,7 +321,7 @@
     historyNext.hidden = true;
     try {
       const result = await request('tahlilReceiptHistory', {
-        session: sessionStorage.getItem(storageKey), offset, query
+        session: sessionStorage.getItem(storageKey), seasonId: selectedSeasonId, offset, query
       });
       if (current !== historyRequest) return;
       if (result.status !== 'ok' || !Array.isArray(result.items)) throw new Error('History unavailable');

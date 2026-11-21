@@ -1,7 +1,7 @@
 name: Frontend security regression
 on:
   push:
-    branches: [main]
+    branches: [main, 'feature/**']
   pull_request:
     branches: [main]
 permissions:
@@ -11,6 +11,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-      - uses: actions/checkout@v4
-      - name: Check frontend security guards (no secrets or live API calls)
-        run: node --test tests/security-guards.test.cjs
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - name: Check frontend, annual seasons and backend guards (no live API calls)
+        run: node --test tests/*.test.cjs

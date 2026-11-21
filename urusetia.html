@@ -1,6 +1,7 @@
 <!doctype html>
 <html lang="ms">
 <head>
+<meta name="referrer" content="no-referrer">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#122e29">
@@ -9,7 +10,7 @@
 <link rel="stylesheet" href="./portal.css">
 <link rel="stylesheet" href="./auth-motion.css?v=google-3d1">
 <script src="./urusetia-config.js" defer></script>
-<script src="./urusetia.js?v=auth-motion2" defer></script>
+<script src="./urusetia.js?v=annual1" defer></script>
 <style>.submission-dialog{box-sizing:border-box;width:min(28rem,calc(100% - 2rem));max-height:calc(100% - 2rem);padding:1.75rem;border:1px solid #ae9257;border-radius:1.25rem;background:#204238;color:#fff1cc;box-shadow:0 1rem 3rem #0008;text-align:center}
 .submission-dialog::backdrop{background:#081914c9}
 .submission-dialog h2{font-size:clamp(1.5rem,5vw,2rem);margin:.65rem 0}
@@ -19,6 +20,17 @@
 @media(prefers-reduced-motion:reduce){.submission-spinner{animation:none}}
 
 .payment-dialog-actions{display:flex;flex-wrap:wrap;justify-content:center;gap:.75rem;margin-top:1rem}
+
+.season-view{margin:1rem 0;padding:1rem;border:1px solid #c8ae7466;border-radius:.85rem}
+.season-view select,#season-edit{max-width:100%;margin:.5rem 0}
+.season-form[hidden],.season-view[hidden]{display:none!important}
+.season-form{display:grid;gap:1rem}.season-form label{display:grid;gap:.4rem}
+.season-dates{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1rem}
+.season-form input{min-width:0;width:100%;box-sizing:border-box}
+.season-form .season-check{display:flex;align-items:flex-start;gap:.6rem}
+.season-check input{width:auto;flex:none;margin-top:.25rem}
+.season-note{font-size:.9rem;line-height:1.6}
+@media(max-width:600px){.season-dates{grid-template-columns:1fr}}
 </style><style>
 .receipt-history{margin-top:1.5rem;padding-top:1.25rem;border-top:1px solid #d6c38b66}
 .history-search,.history-nav{display:flex;flex-wrap:wrap;align-items:center;gap:.6rem}
@@ -45,7 +57,7 @@
   <main class="admin-main">
     <section class="auth-shell auth-shell--staff" aria-labelledby="tajuk">
       <aside class="auth-showcase" aria-label="Akses Urusetia Ramadan">
-        <span class="auth-eyebrow">Syafie Legacy · Ramadan 1448H</span>
+        <span class="auth-eyebrow">Syafie Legacy · Urusetia Program</span>
         <div class="auth-motif" aria-hidden="true"><img class="auth-sl-logo" src="data:image/webp;base64,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LzIyLXJkZi1zeW50YXgtbnMjJz4KCiAgICAgICAgPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9JycKICAgICAgICB4bWxuczpkYz0naHR0cDovL3B1cmwub3JnL2RjL2VsZW1lbnRzLzEuMS8nPgogICAgICAgIDxkYzp0aXRsZT4KICAgICAgICA8cmRmOkFsdD4KICAgICAgICA8cmRmOmxpIHhtbDpsYW5nPSd4LWRlZmF1bHQnPlVudGl0bGVkIGRlc2lnbiAtIDE8L3JkZjpsaT4KICAgICAgICA8L3JkZjpBbHQ+CiAgICAgICAgPC9kYzp0aXRsZT4KICAgICAgICA8L3JkZjpEZXNjcmlwdGlvbj4KCiAgICAgICAgPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9JycKICAgICAgICB4bWxuczpBdHRyaWI9J2h0dHA6Ly9ucy5hdHRyaWJ1dGlvbi5jb20vYWRzLzEuMC8nPgogICAgICAgIDxBdHRyaWI6QWRzPgogICAgICAgIDxyZGY6U2VxPgogICAgICAgIDxyZGY6bGkgcmRmOnBhcnNlVHlwZT0nUmVzb3VyY2UnPgogICAgICAgIDxBdHRyaWI6Q3JlYXRlZD4yMDI0LTA4LTA4PC9BdHRyaWI6Q3JlYXRlZD4KICAgICAgICA8QXR0cmliOkV4dElkPmI2YjU2ZGViLTU5MzItNDExMC05Y2QwLTE5ZDIzYzdiYTU2YjwvQXR0cmliOkV4dElkPgogICAgICAgIDxBdHRyaWI6RmJJZD41MjUyNjU5MTQxNzk1ODA8L0F0dHJpYjpGYklkPgogICAgICAgIDxBdHRyaWI6VG91Y2hUeXBlPjI8L0F0dHJpYjpUb3VjaFR5cGU+CiAgICAgICAgPC9yZGY6bGk+CiAgICAgICAgPC9yZGY6U2VxPgogICAgICAgIDwvQXR0cmliOkFkcz4KICAgICAgICA8L3JkZjpEZXNjcmlwdGlvbj4KCiAgICAgICAgPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9JycKICAgICAgICB4bWxuczpwZGY9J2h0dHA6Ly9ucy5hZG9iZS5jb20vcGRmLzEuMy8nPgogICAgICAgIDxwZGY6QXV0aG9yPlNIRUlLSCBCVUtIT1JJIFNIRUlLSCBHSEFEWkkgKERWUyk8L3BkZjpBdXRob3I+CiAgICAgICAgPC9yZGY6RGVzY3JpcHRpb24+CgogICAgICAgIDxyZGY6RGVzY3JpcHRpb24gcmRmOmFib3V0PScnCiAgICAgICAgeG1sbnM6eG1wPSdodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvJz4KICAgICAgICA8eG1wOkNyZWF0b3JUb29sPkNhbnZhIChSZW5kZXJlcik8L3htcDpDcmVhdG9yVG9vbD4KICAgICAgICA8L3JkZjpEZXNjcmlwdGlvbj4KICAgICAgICAKICAgICAgICA8L3JkZjpSREY+CiAgICAgICAgPC94OnhtcG1ldGE+AA==" alt=""></div>
         <div><h2>Urusan lebih <span class="auth-accent">teratur.</span></h2>
         <p>Semak bayaran, rekod pendaftaran dan resit melalui satu dashboard Urusetia.</p></div>
@@ -60,9 +72,11 @@
       <p id="status" role="status" aria-live="polite">Menyemak tetapan log masuk…</p>
       <noscript><p>Hidupkan JavaScript untuk log masuk.</p></noscript>
       <div id="dashboard" hidden>
+        <div id="season-view-wrap" class="season-view" hidden><label for="season-view">Sesi paparan rekod</label><select id="season-view"></select><p id="season-view-label" role="status"></p></div>
         <nav class="dashboard-nav" aria-label="Menu Urusetia">
           <a href="#semakan-bayaran" aria-controls="semakan-bayaran" aria-current="location">Semakan Bayaran</a>
           <a href="#sejarah-pendaftaran" aria-controls="sejarah-pendaftaran">Sejarah Pendaftaran</a>
+          <a href="#tetapan-sesi" aria-controls="tetapan-sesi">Tetapan Sesi</a>
           <a href="./daftar.html?bantuan=1">Daftar Bagi Pihak Ketiga <span aria-hidden="true">→</span></a>
         </nav>
         <section id="semakan-bayaran" aria-labelledby="payment-title">
@@ -83,6 +97,27 @@
             <button class="button secondary" id="history-next" type="button" hidden>Seterusnya</button>
           </div>
         </section>
+        <section id="tetapan-sesi" aria-labelledby="season-settings-title" hidden>
+          <h2 id="season-settings-title">Tetapan Sesi Program</h2>
+          <p>Semua tarikh dan jam menggunakan waktu Malaysia. Pendaftaran ditutup tepat pada masa tutup yang ditetapkan.</p>
+          <label for="season-edit">Sesi yang hendak diurus</label><select id="season-edit"></select>
+          <button id="season-new" class="button secondary" type="button" disabled>Cipta Sesi Baharu</button>
+          <p id="season-status" role="status" aria-live="polite"></p>
+          <form id="season-form" class="season-form" hidden>
+            <label>ID sesi<input id="season-id" placeholder="Contoh: 1449H" pattern="[0-9]{4}H" maxlength="5" required></label>
+            <label>Nama sesi<input id="season-name" maxlength="120" placeholder="Contoh: Ramadan 1449H" required></label>
+            <div class="season-dates">
+              <label>Tarikh dan jam buka<input id="season-opens" type="datetime-local" required></label>
+              <label>Tarikh dan jam tutup<input id="season-closes" type="datetime-local" required></label>
+            </div>
+            <label class="season-check"><input id="season-enabled" type="checkbox"> Benarkan pendaftaran mengikut jadual</label>
+            <label class="season-check"><input id="season-active" type="checkbox"> Jadikan sesi aktif untuk pendaftaran baharu</label>
+            <p>Rekod sesi lain kekal. Urusetia boleh menyemak bayaran dan resit selepas pendaftaran ditutup.</p>
+            <label class="season-check"><input id="season-receipt" type="checkbox"> Templat, job dan penapis ID musim AutoCrat bagi sesi ini telah disemak</label>
+            <p class="season-note">Sesi baharu bermula tertutup dan menyalin pakej sesi yang dipilih. Semak harga pakej serta tetapan resit sebelum membuka sesi. AutoCrat kekal dijalankan secara manual.</p>
+            <button id="season-save" class="button" type="submit">Simpan Tetapan Sesi</button>
+          </form>
+        </section>
         <div class="actions">
           <button class="button secondary" id="logout" type="button">Log Keluar</button>
         </div>
@@ -92,6 +127,10 @@
   </main>
   <footer>Syafie Legacy</footer>
 </div>
+<dialog id="season-confirm-dialog" class="submission-dialog" aria-labelledby="season-confirm-title" aria-describedby="season-confirm-message">
+  <h2 id="season-confirm-title">Simpan Tetapan Sesi</h2><p id="season-confirm-message"></p>
+  <form method="dialog" class="actions"><button class="button secondary" value="cancel" autofocus>Batal</button><button class="button" value="save">Ya, Simpan</button></form>
+</dialog>
 <dialog id="payment-dialog" class="submission-dialog" aria-labelledby="payment-dialog-title" aria-describedby="payment-dialog-message">
   <span id="payment-spinner" class="submission-spinner" aria-hidden="true" hidden></span>
   <h2 id="payment-dialog-title">Sahkan Bayaran</h2>
@@ -105,7 +144,7 @@
 (() => {
   const links = [...document.querySelectorAll('.dashboard-nav a[aria-controls]')];
   function showDashboardSection() {
-    const current = location.hash === '#sejarah-pendaftaran' ? 'sejarah-pendaftaran' : 'semakan-bayaran';
+    const current = ['#sejarah-pendaftaran','#tetapan-sesi'].includes(location.hash) ? location.hash.slice(1) : 'semakan-bayaran';
     for (const link of links) {
       const id = link.getAttribute('aria-controls');
       const active = id === current;

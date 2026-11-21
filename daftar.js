@@ -13,6 +13,8 @@
   const login = field('google-login');
   const assisted = new URLSearchParams(location.search).get('bantuan') === '1';
   let session = '';
+  let seasonId = '1448H';
+  let seasonVersion = 0;
 
   async function request(data) {
     const response = await fetch(endpoint, {
@@ -67,8 +69,23 @@
         }
       }
       const result = await request({ action: 'tahlilPackages' });
-      if (result.status !== 'ok' || !result.open || !result.packages.length) {
-        status.textContent = 'Pendaftaran belum dibuka.';
+      if (result.status !== 'ok' || !Array.isArray(result.packages)) throw Error('Status unavailable');
+      const season = result.season;
+      if (season && /^\d{4}H$/.test(season.id)) {
+        seasonId = season.id; seasonVersion = season.version;
+        field('registration-title').textContent = (assisted ? 'Daftar Bagi Pihak Peserta · ' : 'Pendaftaran Tahlil · ') + season.name;
+        document.querySelectorAll('[data-season-name]').forEach(el => { el.textContent = season.name; });
+        document.title = 'Pendaftaran Tahlil · ' + season.name;
+        const windowLabel = field('registration-window');
+        if (windowLabel) windowLabel.textContent = season.opensAt && season.closesAt
+          ? 'Buka: ' + season.opensAt.replace('T',' ') + ' · Tutup: ' + season.closesAt.replace('T',' ') + ' (waktu Malaysia).'
+          : 'Tarikh pendaftaran ditentukan oleh urusetia.';
+      }
+      if (result.open !== true || !result.packages.length) {
+        login.hidden = true; form.hidden = true;
+        status.textContent = result.state === 'closed' ? 'Pendaftaran telah ditutup.'
+          : result.state === 'paused' ? 'Pendaftaran ditutup sementara oleh urusetia.'
+          : 'Pendaftaran belum dibuka.';
         return;
       }
       for (const item of result.packages) field('packageId').add(new Option(item.name, item.id));
@@ -165,7 +182,7 @@
       if (dialog) dialogMessage.textContent = 'Memuat naik bukti bayaran dan menyimpan permohonan…';
       const result = await request({
         action: assisted ? 'tahlilAssistedRegister' : 'tahlilRegister',
-        ...details, ...(assisted ? { email: field('email').value } : {}), session, key, mime: proof.type, file
+        ...details, ...(assisted ? { email: field('email').value } : {}), seasonId, seasonVersion, session, key, mime: proof.type, file
       });
       if (result.status === 'ok') {
         outcome = 'Permohonan diterima';
@@ -176,6 +193,11 @@
         if (assisted) showAssistedSignIn();
         else login.hidden = false;
         status.textContent = 'Sesi tamat. Log masuk semula untuk teruskan.';
+      } else if (result.status === 'season_changed') {
+        form.hidden = true; login.hidden = true;
+        status.textContent = 'Sesi pendaftaran telah berubah. Muat semula halaman dan semak pakej sebelum menghantar semula.';
+      } else if (result.status === 'rate_limited') {
+        status.textContent = 'Terlalu banyak cubaan. Tunggu satu minit dan cuba semula.';
       } else if (result.status === 'closed') {
         form.hidden = true;
         status.textContent = 'Pendaftaran telah ditutup.';
