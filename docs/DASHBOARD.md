@@ -49,6 +49,10 @@ Dikemas kini pada **21 November 2026 (MYT)**. Portal Syafie Legacy menggunakan G
 - Kod `DAFTAR-SLIP` pernah dikesan berpunca daripada kebenaran tulis Drive. Pemilik deployment memberikan kebenaran tersebut. Semakan tulis Drive dan penghantaran peserta selepas pembetulan berjaya.
 - AutoCrat kekal dalam **mod manual**. Time trigger belum diaktifkan atau diuji pada portal ini.
 
+## Security checkpoint (21 November 2026)
+
+Frontend hardening telah dipush ke GitHub. **Belum security-signed-off** kerana source lengkap Apps Script V9 yang digunakan LIVE tidak ada di repo dan kawalan server-side belum dapat diverifikasi. Rujuk [laporan security audit](SECURITY_AUDIT_2026-11-21.md). Jangan deploy fail sejarah `apps-script/UrusetiaAuth.gs` sebagai pengganti V9.
+
 ## To-do
 
 - [ ] **Minta Pembetulan Slip** — simpan sebab pembetulan, benarkan peserta menggantikan slip pada rujukan yang sama, kemudian kembalikan rekod ke Semakan Bayaran.
