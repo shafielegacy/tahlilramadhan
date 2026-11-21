@@ -8,7 +8,7 @@
 <title>Akses Urusetia | Tahlil Ramadan</title>
 <link rel="stylesheet" href="./portal.css">
 <script src="./urusetia-config.js" defer></script>
-<script src="./urusetia.js?v=bayaran-popup1" defer></script>
+<script src="./urusetia.js?v=sejarah1" defer></script>
 <style>.submission-dialog{box-sizing:border-box;width:min(28rem,calc(100% - 2rem));max-height:calc(100% - 2rem);padding:1.75rem;border:1px solid #ae9257;border-radius:1.25rem;background:#204238;color:#fff1cc;box-shadow:0 1rem 3rem #0008;text-align:center}
 .submission-dialog::backdrop{background:#081914c9}
 .submission-dialog h2{font-size:clamp(1.5rem,5vw,2rem);margin:.65rem 0}
@@ -18,6 +18,14 @@
 @media(prefers-reduced-motion:reduce){.submission-spinner{animation:none}}
 
 .payment-dialog-actions{display:flex;flex-wrap:wrap;justify-content:center;gap:.75rem;margin-top:1rem}
+</style><style>
+.receipt-history{margin-top:1.5rem;padding-top:1.25rem;border-top:1px solid #d6c38b66}
+.history-search,.history-nav{display:flex;flex-wrap:wrap;align-items:center;gap:.6rem}
+.history-search input{flex:1 1 13rem;min-width:0;padding:.65rem .75rem;border:1px solid #bda36b;border-radius:.5rem;background:#fff8e7;color:#17362d;font:inherit}
+.history-item{padding:.85rem 0;border-bottom:1px solid #d6c38b44;overflow-wrap:anywhere}
+.history-item h3,.history-item p{margin:.3rem 0}
+.history-item a{color:#ffdc93}
+.history-nav{margin-top:1rem}
 </style></head>
 <body>
 <div class="wrap">
@@ -38,6 +46,19 @@
         <h2>Semakan Bayaran</h2>
         <p id="payment-status" role="status"></p>
         <div id="payment-queue"></div>
+        <section class="receipt-history" aria-labelledby="receipt-history-title">
+          <h2 id="receipt-history-title">Sejarah Pendaftaran &amp; Resit</h2>
+          <form id="history-search" class="history-search">
+            <input id="history-query" type="search" maxlength="160" aria-label="Cari ikut nama, e-mel, rujukan atau nombor resit" placeholder="Nama, e-mel, rujukan atau no. resit">
+            <button class="button secondary" type="submit">Cari</button>
+          </form>
+          <p id="history-status" role="status"></p>
+          <div id="history-results"></div>
+          <div class="history-nav">
+            <button class="button secondary" id="history-prev" type="button" hidden>Sebelum</button>
+            <button class="button secondary" id="history-next" type="button" hidden>Seterusnya</button>
+          </div>
+        </section>
         <div class="actions"><button class="button secondary" id="logout" type="button">Log Keluar</button></div>
       </div>
     </section>
