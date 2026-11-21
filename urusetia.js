@@ -29,6 +29,75 @@
     document.getElementById('login-actions').style.display = 'none';
     document.getElementById('dashboard').hidden = false;
     status.textContent = 'Akses urusetia disahkan.';
+    loadPaymentQueue();
+  }
+
+
+  async function loadPaymentQueue(message = '') {
+    const queue = document.getElementById('payment-queue');
+    const feedback = document.getElementById('payment-status');
+    if (!queue || !feedback) return;
+    const session = sessionStorage.getItem(storageKey);
+    feedback.textContent = 'Memuatkan bayaran…';
+    try {
+      const result = await request('tahlilPaymentQueue', { session });
+      if (result.status !== 'ok' || !Array.isArray(result.items)) throw new Error('Queue unavailable');
+      queue.replaceChildren(...result.items.map(item => paymentForm(item, session, feedback)));
+      feedback.textContent = [message, result.items.length ? '' : 'Tiada bayaran menunggu semakan.']
+        .filter(Boolean).join(' ');
+    } catch {
+      feedback.textContent = [message, 'Senarai bayaran tidak dapat dimuatkan. Muat semula halaman.']
+        .filter(Boolean).join(' ');
+    }
+  }
+
+  function paymentForm(item, session, feedback) {
+    const form = document.createElement('form');
+    const heading = document.createElement('h3');
+    heading.textContent = item.name;
+    const info = document.createElement('p');
+    info.textContent = item.package + ' · ' + item.reference;
+    form.append(heading, info);
+    if (!/^https:\/\/drive\.google\.com\//.test(item.proof)) {
+      const missing = document.createElement('p');
+      missing.textContent = 'Pautan bukti bayaran tiada.';
+      form.append(missing);
+      return form;
+    }
+    const proof = document.createElement('a');
+    proof.href = item.proof;
+    proof.target = '_blank';
+    proof.rel = 'noopener noreferrer';
+    proof.textContent = 'Buka bukti bayaran';
+    const label = document.createElement('label');
+    label.textContent = ' Amaun disahkan (RM) ';
+    const amount = document.createElement('input');
+    amount.type = 'number';
+    amount.min = '0.01';
+    amount.step = '0.01';
+    amount.required = true;
+    label.append(amount);
+    const button = document.createElement('button');
+    button.className = 'button';
+    button.type = 'submit';
+    button.textContent = 'Sahkan Bayaran';
+    form.append(proof, label, button);
+    form.addEventListener('submit', async event => {
+      event.preventDefault();
+      if (!confirm('Sahkan bayaran RM' + amount.valueAsNumber.toFixed(2) + ' untuk ' + item.name + '?')) return;
+      button.disabled = true;
+      try {
+        const result = await request('tahlilApprovePayment', {
+          session, reference: item.reference, amount: amount.valueAsNumber
+        });
+        if (result.status !== 'ok' && result.status !== 'already_approved') throw new Error('Approval failed');
+        await loadPaymentQueue('Resit ' + result.receipt + ' sedia untuk AutoCrat.');
+      } catch {
+        feedback.textContent = 'Pengesahan belum dapat dipastikan. Cuba semula.';
+        button.disabled = false;
+      }
+    });
+    return form;
   }
 
   async function completeLogin(response) {
