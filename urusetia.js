@@ -51,6 +51,40 @@
     }
   }
 
+  const paymentDialog = document.getElementById('payment-dialog');
+  const paymentTitle = document.getElementById('payment-dialog-title');
+  const paymentMessage = document.getElementById('payment-dialog-message');
+  const paymentSpinner = document.getElementById('payment-spinner');
+  const paymentCancel = document.getElementById('payment-cancel');
+  const paymentConfirm = document.getElementById('payment-confirm');
+
+  paymentDialog?.addEventListener('cancel', event => {
+    if (!paymentSpinner.hidden) event.preventDefault();
+  });
+
+  function showPaymentDialog(title, message, phase) {
+    if (!paymentDialog) return;
+    paymentTitle.textContent = title;
+    paymentMessage.textContent = message;
+    paymentSpinner.hidden = phase !== 'loading';
+    paymentCancel.hidden = phase === 'loading';
+    paymentCancel.textContent = phase === 'result' ? 'Tutup' : 'Batal';
+    paymentConfirm.hidden = phase !== 'confirm';
+    paymentDialog.returnValue = '';
+    if (!paymentDialog.open) paymentDialog.showModal();
+    if (phase !== 'loading') paymentCancel.focus();
+  }
+
+  function confirmPayment(message) {
+    if (!paymentDialog) return Promise.resolve(window.confirm(message));
+    return new Promise(resolve => {
+      paymentDialog.addEventListener('close', () => {
+        resolve(paymentDialog.returnValue === 'confirm');
+      }, { once: true });
+      showPaymentDialog('Sahkan Bayaran', message, 'confirm');
+    });
+  }
+
   function paymentForm(item, session, feedback) {
     const form = document.createElement('form');
     const heading = document.createElement('h3');
@@ -84,16 +118,21 @@
     form.append(proof, label, button);
     form.addEventListener('submit', async event => {
       event.preventDefault();
-      if (!confirm('Sahkan bayaran RM' + amount.valueAsNumber.toFixed(2) + ' untuk ' + item.name + '?')) return;
+      const approvedAmount = amount.valueAsNumber;
+      if (!await confirmPayment('Sahkan bayaran RM' + approvedAmount.toFixed(2) + ' untuk ' + item.name + '?')) return;
       button.disabled = true;
+      showPaymentDialog('Sedang mengesahkan bayaran…', 'Menyimpan pengesahan dan menyediakan nombor resit…', 'loading');
       try {
         const result = await request('tahlilApprovePayment', {
-          session, reference: item.reference, amount: amount.valueAsNumber
+          session, reference: item.reference, amount: approvedAmount
         });
         if (result.status !== 'ok' && result.status !== 'already_approved') throw new Error('Approval failed');
-        await loadPaymentQueue('Resit ' + result.receipt + ' sedia untuk AutoCrat.');
+        const message = 'Resit ' + result.receipt + ' sedia untuk AutoCrat.';
+        showPaymentDialog('Bayaran disahkan', message, 'result');
+        await loadPaymentQueue(message);
       } catch {
         feedback.textContent = 'Pengesahan belum dapat dipastikan. Cuba semula.';
+        showPaymentDialog('Pengesahan belum selesai', feedback.textContent, 'result');
         button.disabled = false;
       }
     });
