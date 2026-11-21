@@ -74,3 +74,10 @@ Frontend hardening telah dipush ke GitHub. **Belum security-signed-off** kerana 
 - [ ] **Semak status indeks** laman utama dalam Google Search Console.
 - [ ] **Reka semula poster pakej** apabila arah visual baharu dipilih.
 - [ ] **Persediaan musim akan datang** — pemilihan musim aktif dan paparan arkib masih belum dibina.
+
+## Google 3D Login Button — 21 November 2026
+- Kedua-dua butang login peserta (`#google-login`) dan Urusetia (`#login`) kini menggunakan panel biru 3D, tile putih, **Google G SVG empat warna**, efek hover, pressed state dan shine animation halus.
+- Implementasi pada `daftar.html`, `urusetia.html`, `auth-motion.css`; asset SVG inline (tiada permintaan rangkaian tambahan untuk logo). CSS dibaca menggunakan cache-version `google-3d1`.
+- Pada `daftar.js`, mod `bantuan=1` menukar butang navigasi kembali ke dashboard kepada gaya secondary biasa; ia **bukan** Google Sign-In.
+- **Static source checks PASS**: ID button kekal, disabled/hidden asal kekal, Google OAuth masih memanggil `client.requestCode()`, syntax JS sah, CSS responsive/reduced motion tersedia.
+- **QA browser belum disahkan** pada ketika commit: paparan akhir dan Google login perlu disahkan melalui pengguna. Apps Script V9, Google OAuth configuration, data peserta, Sheets, Drive, resit, AutoCrat tidak diubah.
