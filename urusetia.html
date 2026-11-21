@@ -7,6 +7,7 @@
 <meta name="referrer" content="no-referrer">
 <title>Akses Urusetia | Tahlil Ramadan</title>
 <link rel="stylesheet" href="./portal.css">
+<link rel="stylesheet" href="./auth-motion.css?v=ramadan-v2">
 <script src="./urusetia-config.js" defer></script>
 <script src="./urusetia.js?v=sejarah1" defer></script>
 <style>.submission-dialog{box-sizing:border-box;width:min(28rem,calc(100% - 2rem));max-height:calc(100% - 2rem);padding:1.75rem;border:1px solid #ae9257;border-radius:1.25rem;background:#204238;color:#fff1cc;box-shadow:0 1rem 3rem #0008;text-align:center}
@@ -42,7 +43,15 @@
     <a class="button secondary" href="./">Laman Utama</a>
   </header>
   <main class="admin-main">
-    <section class="card admin-card" aria-labelledby="tajuk">
+    <section class="auth-shell auth-shell--staff" aria-labelledby="tajuk">
+      <aside class="auth-showcase" aria-label="Akses Urusetia Ramadan">
+        <span class="auth-eyebrow">Syafie Legacy · Ramadan 1448H</span>
+        <div class="auth-motif" aria-hidden="true"><span class="auth-mosque">☪</span></div>
+        <div><h2>Urusan lebih <span class="auth-accent">teratur.</span></h2>
+        <p>Semak bayaran, rekod pendaftaran dan resit melalui satu dashboard Urusetia.</p></div>
+      </aside>
+      <div class="auth-content">
+      <span class="auth-eyebrow">PENGURUSAN PROGRAM</span>
       <h1 id="tajuk">Akses Urusetia</h1>
       <p id="intro">Gunakan akaun Google yang diberi akses urusetia.</p>
       <div class="actions" id="login-actions">
@@ -78,6 +87,7 @@
           <a class="button secondary" href="https://tahlilsyafielegacy.wasap.my" target="_blank" rel="noopener noreferrer">WhatsApp Ustaz Shafie</a>
           <button class="button secondary" id="logout" type="button">Log Keluar</button>
         </div>
+      </div>
       </div>
     </section>
   </main>
