@@ -26,7 +26,7 @@
   function showDashboard(email) {
     document.getElementById('tajuk').textContent = 'Dashboard Urusetia';
     document.getElementById('intro').textContent = 'Log masuk sebagai ' + email;
-    document.getElementById('login-actions').hidden = true;
+    document.getElementById('login-actions').style.display = 'none';
     document.getElementById('dashboard').hidden = false;
     status.textContent = 'Akses urusetia disahkan.';
   }
