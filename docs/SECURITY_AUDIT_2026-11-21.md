@@ -62,3 +62,9 @@
 - Semua perubahan audit ini hanya di GitHub repo. Deployment Apps Script, Sheets, Drive dan AutoCrat tidak disentuh.
 
 **Final status: FRONTEND HARDENING PARTIAL PASS; BACKEND/END-TO-END SECURITY NOT VERIFIED.**
+
+## GitHub Actions regression fix — 21 November 2026 (malam)
+- Run `Frontend security regression` gagal pada test `slip proof validates signature, extension and reported MIME` (`slip.png`; 4 PASS, 1 FAIL).
+- **Root cause:** mock `fakeFile().slice(0,8)` dalam ujian dahulu mengembalikan seluruh buffer (9 bytes untuk PNG), bukan 8 bytes yang diminta. Kod sebenar `daftar.js` menggunakan native File.slice dan tidak mempunyai bug mock ini.
+- **Fix commit:** `31023cba` mengubah mock supaya mengambil `bytes.slice(start,end)`. Fail sebenar `daftar.js`, GAS, Sheets dan AutoCrat tidak diubah.
+- Source readback GitHub mengesahkan patch ada. **GitHub Actions selepas commit perlu disahkan daripada run baharu; belum claim CI PASS tanpa output run.**
