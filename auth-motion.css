@@ -28,6 +28,9 @@
 .auth-hint a:focus-visible{outline:3px solid #1a6747;outline-offset:4px}
 .auth-content label{color:#194333;font-weight:650}
 .auth-content #daftar{width:100%;animation:auth-form-enter .45s ease both}
+.auth-shell:has(#daftar:not([hidden])) .auth-hint{display:none}
+.auth-content #daftar .button[type=submit]{width:100%;max-width:24rem}
+.auth-shell--staff .auth-content #login-actions{max-width:24rem}
 .auth-content #daftar label{display:grid;gap:.35rem;margin:.9rem 0}
 .auth-content #daftar input,.auth-content #daftar select,.auth-content #daftar textarea{border:1px solid #a1bba5;background:#fffdf6;color:#123a2b;border-radius:.7rem}
 .auth-content #daftar input:focus-visible,.auth-content #daftar select:focus-visible,.auth-content #daftar textarea:focus-visible{outline:3px solid #e1b76e;outline-offset:1px}
