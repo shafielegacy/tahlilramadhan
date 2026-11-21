@@ -30,6 +30,7 @@
     document.getElementById('dashboard').hidden = false;
     status.textContent = 'Akses urusetia disahkan.';
     loadPaymentQueue();
+    loadReceiptHistory();
   }
 
 
@@ -129,7 +130,7 @@
         if (result.status !== 'ok' && result.status !== 'already_approved') throw new Error('Approval failed');
         const message = 'Resit ' + result.receipt + ' sedia untuk AutoCrat.';
         showPaymentDialog('Bayaran disahkan', message, 'result');
-        await loadPaymentQueue(message);
+        await Promise.all([loadPaymentQueue(message), loadReceiptHistory()]);
       } catch {
         feedback.textContent = 'Pengesahan belum dapat dipastikan. Cuba semula.';
         showPaymentDialog('Pengesahan belum selesai', feedback.textContent, 'result');
@@ -137,6 +138,77 @@
       }
     });
     return form;
+  }
+
+
+  const historyForm = document.getElementById('history-search');
+  const historyQuery = document.getElementById('history-query');
+  const historyStatus = document.getElementById('history-status');
+  const historyResults = document.getElementById('history-results');
+  const historyPrevious = document.getElementById('history-prev');
+  const historyNext = document.getElementById('history-next');
+  const receiptPageSize = 25;
+  let receiptOffset = 0;
+  let receiptQuery = '';
+  let historyRequest = 0;
+
+  historyForm?.addEventListener('submit', event => {
+    event.preventDefault();
+    loadReceiptHistory(0, historyQuery.value.trim());
+  });
+  historyPrevious?.addEventListener('click', () => loadReceiptHistory(Math.max(0, receiptOffset - receiptPageSize)));
+  historyNext?.addEventListener('click', () => loadReceiptHistory(receiptOffset + receiptPageSize));
+
+  async function loadReceiptHistory(offset = receiptOffset, query = receiptQuery) {
+    if (!historyForm) return;
+    const current = ++historyRequest;
+    historyStatus.textContent = 'Memuatkan sejarah…';
+    historyResults.replaceChildren();
+    historyPrevious.hidden = true;
+    historyNext.hidden = true;
+    try {
+      const result = await request('tahlilReceiptHistory', {
+        session: sessionStorage.getItem(storageKey), offset, query
+      });
+      if (current !== historyRequest) return;
+      if (result.status !== 'ok' || !Array.isArray(result.items)) throw new Error('History unavailable');
+      receiptOffset = offset;
+      receiptQuery = query;
+      historyResults.replaceChildren(...result.items.map(receiptHistoryItem));
+      historyStatus.textContent = result.items.length
+        ? 'Rekod ' + (offset + 1) + '–' + (offset + result.items.length) + ' daripada ' + result.total
+        : 'Tiada rekod dijumpai.';
+      historyPrevious.hidden = offset === 0;
+      historyNext.hidden = offset + receiptPageSize >= result.total;
+    } catch {
+      if (current === historyRequest) historyStatus.textContent = 'Sejarah belum dapat dimuatkan. Tekan Cari untuk cuba semula.';
+    }
+  }
+
+  function receiptHistoryItem(item) {
+    const row = document.createElement('article');
+    row.className = 'history-item';
+    const name = document.createElement('h3');
+    name.textContent = item.name;
+    const details = document.createElement('p');
+    details.textContent = [item.email, item.reference, item.package].filter(Boolean).join(' · ');
+    const state = document.createElement('p');
+    const label = item.sent ? 'Resit Dihantar'
+      : item.pdf ? 'PDF Dijana · E-mel Belum Disahkan'
+      : item.payment === 'BAYARAN DISAHKAN' ? 'Bayaran Disahkan · Resit Menunggu AutoCrat'
+      : item.payment === 'MENUNGGU SEMAKAN' ? 'Menunggu Pengesahan'
+      : item.payment;
+    state.textContent = [label, item.receipt, item.amount ? 'RM' + item.amount : ''].filter(Boolean).join(' · ');
+    row.append(name, details, state);
+    if (/^https:\/\/(?:drive|docs)\.google\.com\//.test(item.pdf)) {
+      const link = document.createElement('a');
+      link.href = item.pdf;
+      link.target = '_blank';
+      link.rel = 'noopener noreferrer';
+      link.textContent = 'Buka PDF';
+      row.append(link);
+    }
+    return row;
   }
 
   async function completeLogin(response) {
