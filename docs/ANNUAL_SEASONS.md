@@ -1,6 +1,6 @@
 # Sesi Tahunan Tahlil
 
-Status pelaksanaan: kod disediakan pada branch feature/annual-seasons-security. Belum diterbitkan ke Apps Script ketika dokumen ini mula ditulis.
+Status pelaksanaan: **LIVE**, Apps Script **V10** (21 November 2026, 20:58 MYT) dan frontend GitHub Pages main. [Checkpoint dan prompt sambungan](CHECKPOINT_2026-11-22.md). Sesi 1448H kekal aktif/DIBUKA; tiada tarikh sebenar ditetapkan.
 
 ## Penggunaan
 1. Log masuk urusetia, buka Tetapan Sesi.
@@ -36,4 +36,4 @@ Deploy backend ke deployment sedia ada dahulu selepas CI dan semakan source, kem
 V9 asal kekal sebagai versi rollback di Apps Script. Selepas sesi selain 1448H digunakan, rollback V9 tidak sesuai kerana V9 mengunci operasi kepada 1448H; gunakan versi terakhir yang menyokong sesi tahunan. Tambahan kolum tidak perlu dibuang ketika rollback.
 
 ## Verification
-Keputusan CI, semakan browser dan versi deployment akhir akan dicatat selepas semakan selesai.
+47/47 regression PASS (32 backend dengan Google services mock, 10 frontend DOM fixture, 5 security guard). Public API, login admin, pemilih sesi dan borang tetapan disemak secara baca sahaja. Preview mobile 390 × 844 selepas pembetulan visual PASS; readback desktop terakhir masih berbaki. Tiada simpan jadual/sesi atau transaksi LIVE untuk QA. Lihat checkpoint bagi bukti CI dan had.

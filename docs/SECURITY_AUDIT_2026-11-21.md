@@ -1,4 +1,8 @@
 # Tahlil Ramadan 1448H — Security Hardening Review
+
+> **Kemas kini 22 November 2026:** Source V9 sebenar telah diperoleh dan dipadankan; canonical Code.gs dengan server-side hardening dan sesi tahunan telah dideploy sebagai **V10**. **47/47 regression PASS**. [Checkpoint semasa dan batas pengesahan](CHECKPOINT_2026-11-22.md) mengatasi status lama di bawah. Laporan asal dikekalkan sebagai rekod audit awal; ia belum diselaraskan sepenuhnya. Audit ACL semua fail, full-history secrets dan transaksi V10 LIVE belum selesai. Jangan anggap sistem security-signed-off.
+
+## Rekod audit awal — sebelum V10
 **Tarikh:** 21 November 2026 (MYT)  
 **Skop:** GitHub `main` (frontend), sejarah commit berkaitan auth, dokumentasi operasi, dan metadata permission empat aset Google Drive utama.  
 **Kaedah:** Read-only source review dan metadata review; pembetulan hanya di GitHub. **Tiada live POST, tiada akses rekod peserta, tiada deploy Apps Script, tiada perubahan Drive/Sheets/AutoCrat.**

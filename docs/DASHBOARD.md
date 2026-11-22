@@ -1,5 +1,7 @@
 # Operasi Tahlil & Khatam Al-Quran Ramadan 1448H
 
+> **Checkpoint terkini — 22 November 2026:** Backend **V10** dan fungsi sesi tahunan sudah LIVE; CI **47/47 PASS** dan Pages success. 1448H kekal aktif/DIBUKA tanpa tarikh sebenar. [Kemajuan, had QA dan prompt sambungan](CHECKPOINT_2026-11-22.md). Butiran di bawah ialah catatan operasi awal 21 November; pernyataan V9/source tiada/navigasi tiga menu sudah digantikan oleh checkpoint ini. Penyelarasan penuh laporan masih berbaki.
+
 Dikemas kini pada **21 November 2026 (MYT)**. Portal Syafie Legacy menggunakan GitHub Pages untuk paparan, Google Apps Script **V9** untuk log masuk dan urusan pendaftaran, serta Google Sheets, Drive dan AutoCrat untuk rekod dan resit.
 
 ## Akses

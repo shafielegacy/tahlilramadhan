@@ -13,3 +13,6 @@ Ruling: release backend before frontend; remove unproven 1448H fallback on disco
 Final: fixed sub-cent payments, competing activation, stale/default archive UI, lost-response recovery, AutoCrat W:X preflight, resumable package copy and hidden-poster CSS. Each behavioral issue reproduced RED, then GREEN; 32 backend and 10 frontend fixture tests PASS. CI full suite pending for fix commit.
 Final: fixed whole-sheet rewrite by writing metadata and affected rows only; literal formula regression RED→GREEN.
 Deferred minors: none. Actual AutoCrat configuration, shared-origin isolation and full live transaction QA remain explicit release limitations.
+
+## Checkpoint 22 November 2026
+Canonical Code.gs c135e374: actual GitHub Actions 47/47 PASS (32 backend, 10 frontend, 5 security guards), final feature log summary inspected. Main CI/Pages success. Existing backend deployment updated to V10 at 20:58 MYT, 21 November; source editor readback matched in full. No transaction or settings save for QA. Frontend main includes visual contrast/touch fix 8a0dbce; CI/Pages success confirmed again 22 November. Mobile 390x844 PASS; final desktop readback/console triage and full documentation reconciliation remain pending. Work paused at user request. See docs/CHECKPOINT_2026-11-22.md for evidence and restart prompt.
