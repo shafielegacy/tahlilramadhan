@@ -72,3 +72,13 @@
 - **Root cause:** mock `fakeFile().slice(0,8)` dalam ujian dahulu mengembalikan seluruh buffer (9 bytes untuk PNG), bukan 8 bytes yang diminta. Kod sebenar `daftar.js` menggunakan native File.slice dan tidak mempunyai bug mock ini.
 - **Fix commit:** `31023cba` mengubah mock supaya mengambil `bytes.slice(start,end)`. Fail sebenar `daftar.js`, GAS, Sheets dan AutoCrat tidak diubah.
 - Source readback GitHub mengesahkan patch ada. **GitHub Actions selepas commit perlu disahkan daripada run baharu; belum claim CI PASS tanpa output run.**
+
+## Addendum V10 — 22 November 2026 (mengatasi status pra-V10)
+
+**Keputusan: hardening implemented; security sign-off masih PENDING.** Backend canonical `apps-script/Code.gs` dipadankan dengan source V9 asal, diubah, diuji mock dan dideploy V10 pada 21 November 2026 20:58 MYT. Ujian regression 32 backend mock + 10 DOM fixture + 5 security guards = **47 PASS / 0 FAIL**. Semakan login admin dan paparan awam ialah browser read-only; tiada transaksi pendaftaran, pengesahan bayaran, PDF atau e-mel selepas V10 yang disahkan.
+
+Kawalan yang dilaksanakan termasuk pemeriksaan server-side per-action urusetia/allowlist, identiti peserta dari OAuth, cutoff MYT dan ID/versi sesi, retry UUID beridentiti, validasi bytes JPG/PNG/PDF serta 3 MiB, integer cents/lock/idempotensi resit, optimistic concurrency dan targeted writes. Ini mengatasi baris `BE-01` hingga `BE-06` yang dahulu NOT VERIFIED **dari segi semakan source dan mock sahaja**; bukan bukti pentest atau ujian negatif production. Rate control CacheService bersifat best effort. Magic bytes tidak mengesan malware.
+
+**Belum diverifikasi:** ACL setiap fail dan inherited permissions termasuk output AutoCrat; scan secrets keseluruhan sejarah git; isolation origin/sessionStorage bagi projek Pages lain; CSP yang serasi dengan Google Sign-In; ketahanan DDoS; dan transaksi end-to-end V10. Metadata empat aset utama yang diperiksa pada audit asal tidak boleh digeneralisasi kepada semua fail. Tiada perubahan sharing, OAuth, Script Properties atau credential dibuat dalam addendum ini.
+
+**Keputusan QA tambahan pada sambungan ini:** pembacaan source dan dokumentasi GitHub sahaja; tiada akses Chrome DevTools atau screenshot desktop authenticated. Maka desktop post-fix dan punca enam ralat DevTools kekal **OPEN / NOT VERIFIED**. Semakan statik tidak boleh menggantikannya. Rujuk [release report](RELEASE_V10_2026-11-22.md).
