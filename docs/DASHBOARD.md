@@ -2,7 +2,7 @@
 
 > **Checkpoint terkini — 22 November 2026:** Backend **V10** dan fungsi sesi tahunan sudah LIVE; CI **47/47 PASS** dan Pages success. 1448H kekal aktif/DIBUKA tanpa tarikh sebenar. [Kemajuan, had QA dan prompt sambungan](CHECKPOINT_2026-11-22.md). Butiran di bawah ialah catatan operasi awal 21 November; pernyataan V9/source tiada/navigasi tiga menu sudah digantikan oleh checkpoint ini. Penyelarasan penuh laporan masih berbaki.
 
-Dikemas kini pada **21 November 2026 (MYT)**. Portal Syafie Legacy menggunakan GitHub Pages untuk paparan, Google Apps Script **V9** untuk log masuk dan urusan pendaftaran, serta Google Sheets, Drive dan AutoCrat untuk rekod dan resit.
+**Status semasa (22 November 2026):** Portal GitHub Pages dan backend Google Apps Script **V10** LIVE. Google Sheets, Drive dan AutoCrat menyokong rekod dan resit; AutoCrat kekal manual. Jadual di bawah ialah sejarah pemerhatian sebelum V10, bukan pengesahan transaksi selepas V10.
 
 ## Akses
 
@@ -46,14 +46,14 @@ Dikemas kini pada **21 November 2026 (MYT)**. Portal Syafie Legacy menggunakan G
 
 ## Tetapan dan penyelesaian masalah
 
-- Tab `MUSIM` menyimpan status buka atau tutup pendaftaran. Tab `PAKEJ` menyimpan data mengikut ID musim dan pakej. Backend semasa mengendalikan musim `1448H` secara khusus.
+- Tab `MUSIM` menyimpan status buka atau tutup pendaftaran. Tab `PAKEJ` menyimpan data mengikut ID musim dan pakej. Backend V10 menyokong sesi tahunan; `1448H` masih sesi aktif dan DIBUKA.
 - Apps Script menggunakan OAuth web client Tahlil dengan origin GitHub Pages. Client Secret dan senarai e-mel urusetia diurus dalam Script Properties.
 - Kod `DAFTAR-SLIP` pernah dikesan berpunca daripada kebenaran tulis Drive. Pemilik deployment memberikan kebenaran tersebut. Semakan tulis Drive dan penghantaran peserta selepas pembetulan berjaya.
 - AutoCrat kekal dalam **mod manual**. Time trigger belum diaktifkan atau diuji pada portal ini.
 
 ## Security checkpoint (21 November 2026)
 
-Frontend hardening telah dipush ke GitHub. **Belum security-signed-off** kerana source lengkap Apps Script V9 yang digunakan LIVE tidak ada di repo dan kawalan server-side belum dapat diverifikasi. Rujuk [laporan security audit](SECURITY_AUDIT_2026-11-21.md). Jangan deploy fail sejarah `apps-script/UrusetiaAuth.gs` sebagai pengganti V9.
+Frontend dan canonical backend V10 sudah dipush dan backend dideploy. **Belum security-signed-off** kerana audit ACL menyeluruh, sejarah git, pengasingan origin dan ujian transaksi LIVE selepas V10 belum lengkap. Rujuk [laporan security audit](SECURITY_AUDIT_2026-11-21.md). Jangan deploy fail sejarah `apps-script/UrusetiaAuth.gs` sebagai pengganti V9.
 
 ## UI Login Motion V2 — 21 November 2026
 
@@ -75,7 +75,7 @@ Frontend hardening telah dipush ke GitHub. **Belum security-signed-off** kerana 
 - [ ] **Muktamadkan pakej** dengan Ustaz jika harga, penerangan atau had nama perlu diubah.
 - [ ] **Semak status indeks** laman utama dalam Google Search Console.
 - [ ] **Reka semula poster pakej** apabila arah visual baharu dipilih.
-- [ ] **Persediaan musim akan datang** — pemilihan musim aktif dan paparan arkib masih belum dibina.
+- [x] **Asas sesi tahunan** — pemilihan sesi aktif, jadual dan paparan arkib dibina dalam V10; semakan desktop terakhir dan ujian operasi musim seterusnya masih berbaki.
 
 ## Google 3D Login Button — 21 November 2026
 - Kedua-dua butang login peserta (`#google-login`) dan Urusetia (`#login`) kini menggunakan panel biru 3D, tile putih, **Google G SVG empat warna**, efek hover, pressed state dan shine animation halus.
@@ -83,3 +83,11 @@ Frontend hardening telah dipush ke GitHub. **Belum security-signed-off** kerana 
 - Pada `daftar.js`, mod `bantuan=1` menukar butang navigasi kembali ke dashboard kepada gaya secondary biasa; ia **bukan** Google Sign-In.
 - **Static source checks PASS**: ID button kekal, disabled/hidden asal kekal, Google OAuth masih memanggil `client.requestCode()`, syntax JS sah, CSS responsive/reduced motion tersedia.
 - **QA browser belum disahkan** pada ketika commit: paparan akhir dan Google login perlu disahkan melalui pengguna. Apps Script V9, Google OAuth configuration, data peserta, Sheets, Drive, resit, AutoCrat tidak diubah.
+
+## Release V10 — status pengesahan 22 November 2026
+
+- CI 47/47 PASS ialah ujian mock/DOM/security guard, bukan ujian transaksi LIVE.
+- Login urusetia, borang Tetapan Sesi dan portal awam 1448H DIBUKA telah diperhatikan secara baca sahaja mengikut checkpoint. Mobile responsive 390×844 disemak; readback desktop selepas visual fix dan diagnosis badge DevTools enam ralat **belum disahkan**.
+- Tiada sesi baharu, tarikh sebenar, pendaftaran dummy, bayaran, resit, AutoCrat atau e-mel dibuat untuk QA V10.
+- Sebelum musim baharu, pemilik mesti menyemak harga/had nama, templat, job AutoCrat dan penapis `ID_MUSIM` secara manual. Pengakuan `receiptReady` bukan audit job automatik.
+- Risiko berbaki: ACL per-file/inherited, secrets sepanjang sejarah git, shared origin/sessionStorage, CSP/login compatibility, antivirus sebenar dan rate limit platform. Lihat [laporan release](RELEASE_V10_2026-11-22.md).
